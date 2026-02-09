@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,19 +9,21 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 
-// Exercise runs entirely on audio playback
-// No manual steps needed - the audio guides the entire experience
+// Sequenced breathing exercise with voice-led guidance
+// Audio plays automatically with controlled silence between steps
+// No user interaction needed once started
 
 export default function BreathingExerciseScreen() {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'arrival' | 'inhale' | 'exhale' | 'return' | 'complete'>('arrival');
   const [audioError, setAudioError] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const breathScale = useSharedValue(1);
+  const breathOpacity = useSharedValue(0.3);
 
   useEffect(() => {
     const initSession = async () => {
@@ -42,45 +44,113 @@ export default function BreathingExerciseScreen() {
     initSession();
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
   }, []);
 
-  const loadAndPlayAudio = async () => {
+  const playAudioStep = async (url: string) => {
     try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: false,
         shouldDuckAndroid: true,
       });
 
-      const { sound: audioSound } = await Audio.Sound.createAsync(
-        { uri: systemVoiceAudio.exerciseBreathing },
-        { shouldPlay: true, volume: 0.8 },
-        (status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setHasCompleted(true);
-            setIsPlaying(false);
-          }
-        }
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, volume: 0.85 }
       );
       
-      setSound(audioSound);
-      setIsPlaying(true);
-      setAudioError(false);
+      soundRef.current = sound;
+      return sound;
     } catch (error) {
-      console.log('Exercise audio playback failed, showing text fallback:', error);
+      console.log('Audio step failed:', error);
+      throw error;
+    }
+  };
+
+  const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
+    return new Promise((resolve) => {
+      const checkStatus = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.didJustFinish) {
+          resolve();
+        } else {
+          timeoutRef.current = setTimeout(checkStatus, 100);
+        }
+      };
+      checkStatus();
+    });
+  };
+
+  const wait = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      timeoutRef.current = setTimeout(resolve, ms);
+    });
+  };
+
+  const startBreathAnimation = (type: 'inhale' | 'exhale' | 'neutral') => {
+    if (type === 'inhale') {
+      breathScale.value = withTiming(1.4, { duration: 4000, easing: Easing.inOut(Easing.ease) });
+      breathOpacity.value = withTiming(0.8, { duration: 4000 });
+    } else if (type === 'exhale') {
+      breathScale.value = withTiming(1, { duration: 6000, easing: Easing.inOut(Easing.ease) });
+      breathOpacity.value = withTiming(0.3, { duration: 6000 });
+    } else {
+      breathScale.value = withTiming(1, { duration: 1000 });
+      breathOpacity.value = withTiming(0.3, { duration: 1000 });
+    }
+  };
+
+  const runBreathingSequence = async () => {
+    try {
+      // Step 1: Arrival
+      setCurrentStep('arrival');
+      const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.arrival);
+      await waitForAudioEnd(arrivalSound);
+      await wait(3000); // 3 second pause
+
+      // Step 2: Inhale
+      setCurrentStep('inhale');
+      startBreathAnimation('inhale');
+      const inhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.inhale);
+      await waitForAudioEnd(inhaleSound);
+      await wait(4000); // 4 second inhale hold
+
+      // Step 3: Exhale
+      setCurrentStep('exhale');
+      startBreathAnimation('exhale');
+      const exhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.exhale);
+      await waitForAudioEnd(exhaleSound);
+      await wait(6000); // 6 second exhale hold
+
+      // Step 4: Return
+      setCurrentStep('return');
+      startBreathAnimation('neutral');
+      const returnSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.return);
+      await waitForAudioEnd(returnSound);
+
+      // Complete
+      setCurrentStep('complete');
+    } catch (error) {
+      console.log('Breathing sequence failed, showing text fallback:', error);
       setAudioError(true);
-      // Show completion after a reasonable duration for silent reading
-      setTimeout(() => setHasCompleted(true), 180000); // 3 minutes
+      setCurrentStep('complete');
     }
   };
 
   const handleBegin = () => {
     setHasStarted(true);
-    loadAndPlayAudio();
+    runBreathingSequence();
   };
 
   const handleComplete = async () => {
@@ -110,8 +180,11 @@ export default function BreathingExerciseScreen() {
   };
 
   const handleExit = () => {
-    if (sound) {
-      sound.stopAsync();
+    if (soundRef.current) {
+      soundRef.current.stopAsync();
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
     Alert.alert(
       'Exit Exercise',
@@ -123,13 +196,32 @@ export default function BreathingExerciseScreen() {
     );
   };
 
-
-
   const breathAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: breathScale.value }],
+      opacity: breathOpacity.value,
     };
   });
+
+  const getStepMessage = () => {
+    if (audioError) {
+      return 'Audio unavailable. Follow your natural breathing rhythm.';
+    }
+    switch (currentStep) {
+      case 'arrival':
+        return 'Settling in';
+      case 'inhale':
+        return 'Breathe in';
+      case 'exhale':
+        return 'Breathe out';
+      case 'return':
+        return 'Returning';
+      case 'complete':
+        return 'Complete';
+      default:
+        return '';
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -155,27 +247,15 @@ export default function BreathingExerciseScreen() {
                 Once you begin, you can close your eyes and follow the voice guidance—no interaction needed.
               </Text>
             </>
-          ) : audioError ? (
-            <>
-              <Text style={styles.errorTitle}>Audio Unavailable</Text>
-              <Text style={styles.errorText}>
-                The audio track could not be loaded. Please sit comfortably and follow your own breathing rhythm:
-                {'\n\n'}
-                Breathe in slowly through your nose for 4 counts.
-                {'\n'}
-                Hold gently for 4 counts.
-                {'\n'}
-                Breathe out through your mouth for 6 counts.
-                {'\n\n'}
-                Repeat 3 times, then notice how your body feels.
-              </Text>
-            </>
           ) : (
             <>
               <Animated.View style={[styles.breathCircle, breathAnimatedStyle]} />
-              <Text style={styles.playingText}>
-                {isPlaying ? 'Follow the voice guidance' : 'Exercise in progress'}
-              </Text>
+              <Text style={styles.stepMessage}>{getStepMessage()}</Text>
+              {audioError && (
+                <Text style={styles.fallbackText}>
+                  Continue with your natural breathing rhythm
+                </Text>
+              )}
             </>
           )}
         </View>
@@ -187,7 +267,7 @@ export default function BreathingExerciseScreen() {
             <Text style={styles.beginButtonText}>Begin Exercise</Text>
             <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </Pressable>
-        ) : hasCompleted ? (
+        ) : currentStep === 'complete' ? (
           <Pressable style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>I Have Returned</Text>
             <MaterialIcons name="check" size={20} color={colors.background} />
@@ -230,63 +310,33 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.md,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-  },
   stepContainer: {
     flex: 1,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  stepTitle: {
-    fontSize: typography.sizes.xxl,
-    fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    letterSpacing: typography.letterSpacing.title,
-  },
   breathCircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'transparent',
-    borderWidth: 3,
-    borderColor: colors.primary,
-    marginBottom: spacing.xl,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: colors.primary,
+    marginBottom: spacing.xl * 2,
   },
-  playingText: {
-    fontSize: typography.sizes.lg,
-    fontFamily: typography.fonts.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: spacing.xl,
-  },
-  errorTitle: {
-    fontSize: typography.sizes.xxl,
+  stepMessage: {
+    fontSize: typography.sizes.xl,
     fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
+    fontWeight: typography.weights.semibold,
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginTop: spacing.lg,
   },
-  errorText: {
+  fallbackText: {
     fontSize: typography.sizes.md,
     fontFamily: typography.fonts.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    marginTop: spacing.md,
     paddingHorizontal: spacing.xl,
   },
   welcomeTitle: {
@@ -327,7 +377,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     minHeight: 90,
   },
-
   completeButton: {
     flexDirection: 'row',
     alignItems: 'center',
