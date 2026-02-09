@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, Easing, withSequence } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -25,8 +26,20 @@ export default function PlaySomaticTrackScreen() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [audioError, setAudioError] = useState(false);
   const [breathCycleCount, setBreathCycleCount] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState<'arrival' | 'settling' | 'breathing' | 'holding' | 'closing' | 'complete'>('arrival');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Animated values for Pro experience
+  const breathRingScale = useSharedValue(1);
+  const breathRingOpacity = useSharedValue(0.3);
+  const contentOpacity = useSharedValue(1);
+  const ctaOpacity = useSharedValue(0);
+  
+  // Total duration for Breath Settling: approximately 120 seconds (2 minutes)
+  const totalDuration = 120;
 
   useEffect(() => {
     if (!track) {
@@ -39,12 +52,30 @@ export default function PlaySomaticTrackScreen() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
       if (soundRef.current) {
         soundRef.current.unloadAsync();
       }
       Speech.stop();
     };
   }, []);
+  
+  // Start progress tracking for Pro experience
+  useEffect(() => {
+    if (hasStarted && isPlaying && trackType === 'breath_settling') {
+      progressIntervalRef.current = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+      
+      return () => {
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+      };
+    }
+  }, [hasStarted, isPlaying, trackType]);
 
   const startPlayback = async () => {
     if (!track) return;
@@ -148,54 +179,93 @@ export default function PlaySomaticTrackScreen() {
     });
   };
 
+  const startBreathAnimation = (type: 'inhale' | 'exhale' | 'neutral') => {
+    if (type === 'inhale') {
+      breathRingScale.value = withTiming(1.4, { duration: 4000, easing: Easing.inOut(Easing.ease) });
+      breathRingOpacity.value = withTiming(0.6, { duration: 4000 });
+    } else if (type === 'exhale') {
+      breathRingScale.value = withTiming(1, { duration: 6000, easing: Easing.inOut(Easing.ease) });
+      breathRingOpacity.value = withTiming(0.2, { duration: 6000 });
+    } else {
+      breathRingScale.value = withRepeat(
+        withSequence(
+          withTiming(1.15, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+      breathRingOpacity.value = withTiming(0.25, { duration: 2000 });
+    }
+  };
+  
+  const fadeContent = (visible: boolean) => {
+    contentOpacity.value = withTiming(visible ? 1 : 0.2, { duration: 1500, easing: Easing.ease });
+  };
+  
+  const showCompletionCTA = () => {
+    ctaOpacity.value = withTiming(1, { duration: 2000, easing: Easing.ease });
+  };
+
   const runBreathSettlingSequence = async () => {
     try {
+      fadeContent(false); // Minimize distractions during audio
+      
       // Step 1: Arrival
-      setCurrentIndex(0);
+      setCurrentPhase('arrival');
+      startBreathAnimation('neutral');
       const arrivalSound = await playAudioStep(systemVoiceAudio.breathSettling.arrival);
       await waitForAudioEnd(arrivalSound);
       await wait(4000); // 4 second pause
 
       // Step 2: Settling
-      setCurrentIndex(1);
+      setCurrentPhase('settling');
       const settlingSound = await playAudioStep(systemVoiceAudio.breathSettling.settling);
       await waitForAudioEnd(settlingSound);
       await wait(6000); // 6 second pause
 
       // Steps 3-4: Breath cycles (3 times)
+      setCurrentPhase('breathing');
       for (let i = 0; i < 3; i++) {
         setBreathCycleCount(i + 1);
         
         // Inhale
-        setCurrentIndex(2);
+        startBreathAnimation('inhale');
         const inhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.inhale);
         await waitForAudioEnd(inhaleSound);
         await wait(4000); // 4 second hold
 
         // Exhale
-        setCurrentIndex(3);
+        startBreathAnimation('exhale');
         const exhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.exhale);
         await waitForAudioEnd(exhaleSound);
         await wait(6000); // 6 second hold
       }
 
       // Step 5: Hold
-      setCurrentIndex(4);
+      setCurrentPhase('holding');
+      startBreathAnimation('neutral');
       const holdSound = await playAudioStep(systemVoiceAudio.breathSettling.hold);
       await waitForAudioEnd(holdSound);
       await wait(20000); // 20 second hold
 
       // Step 6: Close
-      setCurrentIndex(5);
+      setCurrentPhase('closing');
       const closeSound = await playAudioStep(systemVoiceAudio.breathSettling.close);
       await waitForAudioEnd(closeSound);
 
       // Complete
-      handleComplete();
+      setCurrentPhase('complete');
+      setIsPlaying(false);
+      fadeContent(true);
+      showCompletionCTA();
     } catch (error) {
       console.log('Breath settling sequence failed, showing text fallback:', error);
       setAudioError(true);
-      handleComplete();
+      setCurrentPhase('complete');
+      setIsPlaying(false);
+      fadeContent(true);
+      showCompletionCTA();
     }
   };
 
@@ -240,6 +310,26 @@ export default function PlaySomaticTrackScreen() {
     router.replace('/grounding');
   };
 
+  // Animated styles for Pro experience
+  const breathRingStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: breathRingScale.value }],
+      opacity: breathRingOpacity.value,
+    };
+  });
+  
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: contentOpacity.value,
+    };
+  });
+  
+  const ctaAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: ctaOpacity.value,
+    };
+  });
+  
   if (!track) {
     return (
       <SafeAreaView style={styles.container}>
@@ -250,24 +340,23 @@ export default function PlaySomaticTrackScreen() {
     );
   }
 
-  // For Breath Settling, use fixed 6-step progression
-  const totalSteps = trackType === 'breath_settling' ? 6 : track.script.length;
-  const progress = totalSteps > 0 ? (currentIndex / totalSteps) * 100 : 0;
+  // For Breath Settling Pro: time-based progress instead of step-based
+  const progress = trackType === 'breath_settling' 
+    ? Math.min((elapsedSeconds / totalDuration) * 100, 100)
+    : track.script.length > 0 ? (currentIndex / track.script.length) * 100 : 0;
   const currentSegment = track.script[currentIndex];
   
-  // Breath Settling fallback text
-  const getBreathSettlingText = () => {
-    if (audioError) {
-      return ['Arrive and allow yourself to settle.', 'Let the breath soften.', 'Inhale gently.', 'Exhale slowly.', 'Allow the breath to find its own rhythm.', 'This exercise is complete.'][currentIndex] || '';
-    }
+  // Pro version: minimal phase text (single quiet words)
+  const getProPhaseText = () => {
+    if (audioError) return '';
     
-    switch (currentIndex) {
-      case 0: return 'Arriving';
-      case 1: return 'Settling';
-      case 2: return breathCycleCount > 0 ? `Inhale (${breathCycleCount}/3)` : 'Inhale';
-      case 3: return breathCycleCount > 0 ? `Exhale (${breathCycleCount}/3)` : 'Exhale';
-      case 4: return 'Holding';
-      case 5: return 'Closing';
+    switch (currentPhase) {
+      case 'arrival': return 'Arriving';
+      case 'settling': return 'Settling';
+      case 'breathing': return 'Breathing';
+      case 'holding': return 'Holding';
+      case 'closing': return 'Closing';
+      case 'complete': return '';
       default: return '';
     }
   };
@@ -285,57 +374,96 @@ export default function PlaySomaticTrackScreen() {
 
       {/* Main Content */}
       <View style={styles.content}>
-        {/* Progress */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        {trackType === 'breath_settling' && hasStarted ? (
+          // Pro Voice-Led Experience: Minimal UI with breathing anchor
+          <View style={styles.proExperienceContainer}>
+            {/* Subtle time-based progress */}
+            <View style={styles.proProgressContainer}>
+              <View style={styles.proProgressBar}>
+                <View style={[styles.proProgressFill, { width: `${progress}%` }]} />
+              </View>
+            </View>
+            
+            {/* Breathing Ring Visual Anchor */}
+            <View style={styles.breathAnchorContainer}>
+              <Animated.View style={[styles.breathRing, breathRingStyle]} />
+            </View>
+            
+            {/* Minimal Phase Text - Fades during audio */}
+            {currentPhase !== 'complete' && (
+              <Animated.View style={[styles.phaseTextContainer, contentAnimatedStyle]}>
+                <Text style={styles.proPhaseText}>{getProPhaseText()}</Text>
+              </Animated.View>
+            )}
+            
+            {/* Completion CTA - Fades in only at end */}
+            {currentPhase === 'complete' && (
+              <Animated.View style={[styles.proCompletionContainer, ctaAnimatedStyle]}>
+                <Text style={styles.proCompletionText}>Complete</Text>
+              </Animated.View>
+            )}
           </View>
-          <Text style={styles.progressText}>
-            {currentIndex + 1} of {totalSteps}
-          </Text>
-        </View>
-
-        {/* Current Text */}
-        {hasStarted ? (
-          <View style={styles.textContainer}>
-            <Text style={styles.currentText}>
-              {trackType === 'breath_settling' ? getBreathSettlingText() : (currentSegment ? currentSegment.text : 'Complete')}
-            </Text>
-          </View>
+        ) : trackType !== 'breath_settling' && hasStarted ? (
+          // Free version: Standard step-based UI
+          <>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${progress}%` }]} />
+              </View>
+              <Text style={styles.progressText}>
+                {currentIndex + 1} of {track.script.length}
+              </Text>
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.currentText}>
+                {currentSegment ? currentSegment.text : 'Complete'}
+              </Text>
+            </View>
+            <View style={styles.instructionsCard}>
+              <MaterialIcons name="info-outline" size={20} color={colors.accent} />
+              <Text style={styles.instructionsText}>
+                Allow your body to settle. Notice without judgment. Let the work pass through.
+              </Text>
+            </View>
+          </>
         ) : (
+          // Welcome screen (both versions)
           <View style={styles.welcomeContainer}>
             <MaterialIcons name="spa" size={64} color={colors.primary} style={{ marginBottom: spacing.xl }} />
             <Text style={styles.welcomeTitle}>{track.title}</Text>
+            {trackType === 'breath_settling' && (
+              <View style={styles.proBadge}>
+                <Text style={styles.proBadgeText}>PRO</Text>
+              </View>
+            )}
             <Text style={styles.welcomeText}>
-              A {Math.ceil(track.durationSeconds / 60)}-minute body-focused cool-down track.
-              {"\n\n"}
-              Find a comfortable position—seated or lying down.
-              {"\n\n"}
-              Once you begin, you can close your eyes and follow the voice guidance through gentle release.
-            </Text>
-          </View>
-        )}
-
-        {/* Instructions */}
-        {hasStarted && (
-          <View style={styles.instructionsCard}>
-            <MaterialIcons name="info-outline" size={20} color={colors.accent} />
-            <Text style={styles.instructionsText}>
-              Allow your body to settle. Notice without judgment. Let the work pass through.
+              {trackType === 'breath_settling' 
+                ? "A 2-minute voice-led settling practice.\n\nFind a comfortable position. You may close your eyes once you begin.\n\nThe voice will guide you—no interaction needed."
+                : `A ${Math.ceil(track.durationSeconds / 60)}-minute body-focused cool-down track.\n\nFind a comfortable position—seated or lying down.\n\nOnce you begin, you can close your eyes and follow the voice guidance through gentle release.`
+              }
             </Text>
           </View>
         )}
       </View>
 
       {/* Footer */}
-      {!hasStarted && (
+      {!hasStarted ? (
         <View style={styles.footer}>
           <Pressable style={styles.beginButton} onPress={startPlayback}>
-            <Text style={styles.beginButtonText}>Begin Track</Text>
+            <Text style={styles.beginButtonText}>Begin</Text>
             <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </Pressable>
         </View>
-      )}
+      ) : trackType === 'breath_settling' && currentPhase === 'complete' ? (
+        <Animated.View style={[styles.footer, ctaAnimatedStyle]}>
+          <Pressable 
+            style={styles.completeButton} 
+            onPress={handleComplete}
+          >
+            <Text style={styles.completeButtonText}>I Have Returned</Text>
+          </Pressable>
+        </Animated.View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -375,6 +503,68 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     justifyContent: 'center',
   },
+  
+  // Pro Voice-Led Experience Styles
+  proExperienceContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  proProgressContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing.xl,
+  },
+  proProgressBar: {
+    height: 2,
+    backgroundColor: colors.border + '40', // Very subtle
+    borderRadius: 1,
+    overflow: 'hidden',
+  },
+  proProgressFill: {
+    height: '100%',
+    backgroundColor: colors.primary + '60', // Soft, not distracting
+  },
+  breathAnchorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xl * 3,
+  },
+  breathRing: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 2,
+    borderColor: colors.primary + '50',
+    backgroundColor: colors.primary + '10',
+  },
+  phaseTextContainer: {
+    position: 'absolute',
+    bottom: spacing.xl * 4,
+  },
+  proPhaseText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.regular,
+    color: colors.textTertiary,
+    textAlign: 'center',
+    letterSpacing: 2,
+    textTransform: 'lowercase',
+  },
+  proCompletionContainer: {
+    alignItems: 'center',
+  },
+  proCompletionText: {
+    fontSize: typography.sizes.lg,
+    fontFamily: typography.fonts.displayBold,
+    fontWeight: typography.weights.medium,
+    color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  
+  // Free Version (Standard) Styles
   progressContainer: {
     marginBottom: spacing.xxl,
   },
@@ -422,7 +612,21 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.bold,
     color: colors.textPrimary,
     textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  proBadge: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
     marginBottom: spacing.lg,
+  },
+  proBadgeText: {
+    fontSize: typography.sizes.xs,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.bold,
+    color: colors.background,
+    letterSpacing: 1.5,
   },
   welcomeText: {
     fontSize: typography.sizes.md,
@@ -466,6 +670,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   beginButtonText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.semibold,
+    color: colors.background,
+  },
+  completeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+  },
+  completeButtonText: {
     fontSize: typography.sizes.md,
     fontFamily: typography.fonts.body,
     fontWeight: typography.weights.semibold,
