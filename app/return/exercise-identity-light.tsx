@@ -81,15 +81,12 @@ export default function IdentitySeparationLightScreen() {
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve) => {
-      const checkStatus = async () => {
-        const status = await sound.getStatusAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null); // Clear listener
           resolve();
-        } else {
-          timeoutRef.current = setTimeout(checkStatus, 100);
         }
-      };
-      checkStatus();
+      });
     });
   };
 
@@ -110,6 +107,7 @@ export default function IdentitySeparationLightScreen() {
       startWaveAnimation();
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.arrival);
       await waitForAudioEnd(arrivalSound);
+      await arrivalSound.unloadAsync();
       await wait(4000); // 4 second pause
 
       // Step 2: Name Self
@@ -117,6 +115,7 @@ export default function IdentitySeparationLightScreen() {
       startWaveAnimation();
       const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.nameSelf);
       await waitForAudioEnd(nameSelfSound);
+      await nameSelfSound.unloadAsync();
       await wait(5000); // 5 second hold
 
       // Step 3: Separate
@@ -124,6 +123,7 @@ export default function IdentitySeparationLightScreen() {
       startWaveAnimation();
       const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.separate);
       await waitForAudioEnd(separateSound);
+      await separateSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 4: Close
@@ -131,6 +131,7 @@ export default function IdentitySeparationLightScreen() {
       startWaveAnimation();
       const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.close);
       await waitForAudioEnd(closeSound);
+      await closeSound.unloadAsync();
 
       // Complete
       setCurrentStep('complete');

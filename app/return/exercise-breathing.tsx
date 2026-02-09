@@ -81,15 +81,12 @@ export default function BreathingExerciseScreen() {
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve) => {
-      const checkStatus = async () => {
-        const status = await sound.getStatusAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null); // Clear listener
           resolve();
-        } else {
-          timeoutRef.current = setTimeout(checkStatus, 100);
         }
-      };
-      checkStatus();
+      });
     });
   };
 
@@ -118,6 +115,7 @@ export default function BreathingExerciseScreen() {
       setCurrentStep('arrival');
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.arrival);
       await waitForAudioEnd(arrivalSound);
+      await arrivalSound.unloadAsync();
       await wait(4000); // 4 second pause
 
       // Step 2: Settle
@@ -125,6 +123,7 @@ export default function BreathingExerciseScreen() {
       startBreathAnimation('neutral');
       const settleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.settle);
       await waitForAudioEnd(settleSound);
+      await settleSound.unloadAsync();
       await wait(4000); // 4 second pause
 
       // Step 3: First guided inhale
@@ -132,6 +131,7 @@ export default function BreathingExerciseScreen() {
       startBreathAnimation('inhale');
       const inhale1Sound = await playAudioStep(systemVoiceAudio.exerciseBreathing.inhale4);
       await waitForAudioEnd(inhale1Sound);
+      await inhale1Sound.unloadAsync();
       await wait(4000); // 4 second inhale hold
 
       // Step 4: First guided exhale
@@ -139,6 +139,7 @@ export default function BreathingExerciseScreen() {
       startBreathAnimation('exhale');
       const exhale1Sound = await playAudioStep(systemVoiceAudio.exerciseBreathing.exhale6);
       await waitForAudioEnd(exhale1Sound);
+      await exhale1Sound.unloadAsync();
       await wait(6000); // 6 second exhale hold
 
       // Steps 5-6: Repeat cycles (3 times total)
@@ -150,12 +151,14 @@ export default function BreathingExerciseScreen() {
         startBreathAnimation('inhale');
         const repeatInhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.repeatCue);
         await waitForAudioEnd(repeatInhaleSound);
+        await repeatInhaleSound.unloadAsync();
         await wait(4000); // 4 second inhale hold
 
         // Exhale cue
         startBreathAnimation('exhale');
         const repeatExhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.repeatExhaleCue);
         await waitForAudioEnd(repeatExhaleSound);
+        await repeatExhaleSound.unloadAsync();
         await wait(6000); // 6 second exhale hold
       }
 
@@ -164,12 +167,14 @@ export default function BreathingExerciseScreen() {
       startBreathAnimation('neutral');
       const quietSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.quietHold);
       await waitForAudioEnd(quietSound);
+      await quietSound.unloadAsync();
       await wait(30000); // 30 second silent hold
 
       // Step 8: Return and close
       setCurrentStep('return');
       const returnSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.returnClose);
       await waitForAudioEnd(returnSound);
+      await returnSound.unloadAsync();
 
       // Complete
       setCurrentStep('complete');

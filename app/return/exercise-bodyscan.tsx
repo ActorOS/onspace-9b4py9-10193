@@ -92,15 +92,12 @@ export default function BodyScanExerciseScreen() {
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve) => {
-      const checkStatus = async () => {
-        const status = await sound.getStatusAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null); // Clear listener
           resolve();
-        } else {
-          timeoutRef.current = setTimeout(checkStatus, 100);
         }
-      };
-      checkStatus();
+      });
     });
   };
 
@@ -122,6 +119,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('arrival');
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.arrival);
       await waitForAudioEnd(arrivalSound);
+      await arrivalSound.unloadAsync();
       await wait(4000); // 4 second pause
 
       // Step 2: Grounding
@@ -129,6 +127,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('grounding');
       const groundingSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.grounding);
       await waitForAudioEnd(groundingSound);
+      await groundingSound.unloadAsync();
       await wait(6000); // 6 second pause
 
       // Step 3: Feet
@@ -136,6 +135,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('feet');
       const feetSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.feet);
       await waitForAudioEnd(feetSound);
+      await feetSound.unloadAsync();
       await wait(10000); // 10 second hold
 
       // Step 4: Legs
@@ -143,6 +143,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('legs');
       const legsSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.legs);
       await waitForAudioEnd(legsSound);
+      await legsSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 5: Pelvis
@@ -150,6 +151,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('pelvis');
       const pelvisSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.pelvis);
       await waitForAudioEnd(pelvisSound);
+      await pelvisSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 6: Torso
@@ -157,6 +159,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('torso');
       const torsoSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.torso);
       await waitForAudioEnd(torsoSound);
+      await torsoSound.unloadAsync();
       await wait(15000); // 15 second hold
 
       // Step 7: Shoulders & Arms
@@ -164,6 +167,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('shoulders');
       const shouldersSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.shouldersArms);
       await waitForAudioEnd(shouldersSound);
+      await shouldersSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 8: Neck & Face
@@ -171,6 +175,7 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('neck');
       const neckSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.neckFace);
       await waitForAudioEnd(neckSound);
+      await neckSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 9: Whole Body
@@ -178,12 +183,14 @@ export default function BodyScanExerciseScreen() {
       startScanAnimation('whole');
       const wholeSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.wholeBody);
       await waitForAudioEnd(wholeSound);
+      await wholeSound.unloadAsync();
       await wait(30000); // 30 second integration hold
 
       // Step 10: Return & Close
       setCurrentStep('return');
       const returnSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.returnClose);
       await waitForAudioEnd(returnSound);
+      await returnSound.unloadAsync();
 
       // Complete
       setCurrentStep('complete');

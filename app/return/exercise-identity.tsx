@@ -91,15 +91,12 @@ export default function IdentitySeparationScreen() {
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve) => {
-      const checkStatus = async () => {
-        const status = await sound.getStatusAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null); // Clear listener
           resolve();
-        } else {
-          timeoutRef.current = setTimeout(checkStatus, 100);
         }
-      };
-      checkStatus();
+      });
     });
   };
 
@@ -120,6 +117,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.arrival);
       await waitForAudioEnd(arrivalSound);
+      await arrivalSound.unloadAsync();
       await wait(5000); // 5 second pause
 
       // Step 2: Name Self
@@ -127,6 +125,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.nameSelf);
       await waitForAudioEnd(nameSelfSound);
+      await nameSelfSound.unloadAsync();
       await wait(8000); // 8 second hold
 
       // Step 3: Acknowledge Role
@@ -134,6 +133,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const acknowledgeRoleSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.acknowledgeRole);
       await waitForAudioEnd(acknowledgeRoleSound);
+      await acknowledgeRoleSound.unloadAsync();
       await wait(10000); // 10 second hold
 
       // Step 4: Locate Boundary
@@ -141,6 +141,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const locateBoundarySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.locateBoundary);
       await waitForAudioEnd(locateBoundarySound);
+      await locateBoundarySound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 5: Separate
@@ -148,6 +149,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.separate);
       await waitForAudioEnd(separateSound);
+      await separateSound.unloadAsync();
       await wait(20000); // 20 second hold (core separation moment)
 
       // Step 6: Return to Self
@@ -155,6 +157,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const returnToSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.returnToSelf);
       await waitForAudioEnd(returnToSelfSound);
+      await returnToSelfSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 7: Release Responsibility
@@ -162,6 +165,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const releaseResponsibilitySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.releaseResponsibility);
       await waitForAudioEnd(releaseResponsibilitySound);
+      await releaseResponsibilitySound.unloadAsync();
       await wait(15000); // 15 second hold
 
       // Step 8: Ground Self
@@ -169,6 +173,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const groundSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.groundSelf);
       await waitForAudioEnd(groundSelfSound);
+      await groundSelfSound.unloadAsync();
       await wait(12000); // 12 second hold
 
       // Step 9: Close
@@ -176,6 +181,7 @@ export default function IdentitySeparationScreen() {
       startWaveAnimation();
       const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.close);
       await waitForAudioEnd(closeSound);
+      await closeSound.unloadAsync();
 
       // Complete
       setCurrentStep('complete');
