@@ -70,6 +70,19 @@ export const systemVoiceAudio = {
     separate: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_03_separate.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_04_close.mp3',
   },
+
+  /**
+   * Breath Settling (Somatic Track)
+   * 6-step time-governed breathing exercise for light workload sessions
+   */
+  breathSettling: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_01_arrival.mp3',
+    settling: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_02_settling.mp3',
+    inhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_03_inhale.mp3',
+    exhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_04_exhale.mp3',
+    hold: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_05_hold.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_06_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;

@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { somaticExitStorage, type SomaticTrackType, type SomaticScript } from '@/services/somaticExitStorage';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
 
 export default function PlaySomaticTrackScreen() {
   const router = useRouter();
@@ -21,7 +23,10 @@ export default function PlaySomaticTrackScreen() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [audioError, setAudioError] = useState(false);
+  const [breathCycleCount, setBreathCycleCount] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     if (!track) {
@@ -34,6 +39,9 @@ export default function PlaySomaticTrackScreen() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
       Speech.stop();
     };
   }, []);
@@ -45,7 +53,13 @@ export default function PlaySomaticTrackScreen() {
     setStartTime(Date.now());
     setIsPlaying(true);
     setCurrentIndex(0);
-    playCurrentSegment(0);
+    
+    // Use voice-led sequence for Breath Settling
+    if (trackType === 'breath_settling') {
+      runBreathSettlingSequence();
+    } else {
+      playCurrentSegment(0);
+    }
   };
 
   const playCurrentSegment = async (index: number) => {
@@ -88,8 +102,108 @@ export default function PlaySomaticTrackScreen() {
     }
   };
 
+  // Voice-led Breath Settling sequence
+  const playAudioStep = async (url: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, volume: 0.85 }
+      );
+      
+      soundRef.current = sound;
+      return sound;
+    } catch (error) {
+      console.log('Audio step failed:', error);
+      throw error;
+    }
+  };
+
+  const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
+    return new Promise((resolve) => {
+      const checkStatus = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.didJustFinish) {
+          resolve();
+        } else {
+          timeoutRef.current = setTimeout(checkStatus, 100);
+        }
+      };
+      checkStatus();
+    });
+  };
+
+  const wait = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      timeoutRef.current = setTimeout(resolve, ms);
+    });
+  };
+
+  const runBreathSettlingSequence = async () => {
+    try {
+      // Step 1: Arrival
+      setCurrentIndex(0);
+      const arrivalSound = await playAudioStep(systemVoiceAudio.breathSettling.arrival);
+      await waitForAudioEnd(arrivalSound);
+      await wait(4000); // 4 second pause
+
+      // Step 2: Settling
+      setCurrentIndex(1);
+      const settlingSound = await playAudioStep(systemVoiceAudio.breathSettling.settling);
+      await waitForAudioEnd(settlingSound);
+      await wait(6000); // 6 second pause
+
+      // Steps 3-4: Breath cycles (3 times)
+      for (let i = 0; i < 3; i++) {
+        setBreathCycleCount(i + 1);
+        
+        // Inhale
+        setCurrentIndex(2);
+        const inhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.inhale);
+        await waitForAudioEnd(inhaleSound);
+        await wait(4000); // 4 second hold
+
+        // Exhale
+        setCurrentIndex(3);
+        const exhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.exhale);
+        await waitForAudioEnd(exhaleSound);
+        await wait(6000); // 6 second hold
+      }
+
+      // Step 5: Hold
+      setCurrentIndex(4);
+      const holdSound = await playAudioStep(systemVoiceAudio.breathSettling.hold);
+      await waitForAudioEnd(holdSound);
+      await wait(20000); // 20 second hold
+
+      // Step 6: Close
+      setCurrentIndex(5);
+      const closeSound = await playAudioStep(systemVoiceAudio.breathSettling.close);
+      await waitForAudioEnd(closeSound);
+
+      // Complete
+      handleComplete();
+    } catch (error) {
+      console.log('Breath settling sequence failed, showing text fallback:', error);
+      setAudioError(true);
+      handleComplete();
+    }
+  };
+
   const handleExit = async () => {
     Speech.stop();
+    if (soundRef.current) {
+      soundRef.current.stopAsync();
+    }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -136,8 +250,27 @@ export default function PlaySomaticTrackScreen() {
     );
   }
 
-  const progress = track.script.length > 0 ? (currentIndex / track.script.length) * 100 : 0;
+  // For Breath Settling, use fixed 6-step progression
+  const totalSteps = trackType === 'breath_settling' ? 6 : track.script.length;
+  const progress = totalSteps > 0 ? (currentIndex / totalSteps) * 100 : 0;
   const currentSegment = track.script[currentIndex];
+  
+  // Breath Settling fallback text
+  const getBreathSettlingText = () => {
+    if (audioError) {
+      return ['Arrive and allow yourself to settle.', 'Let the breath soften.', 'Inhale gently.', 'Exhale slowly.', 'Allow the breath to find its own rhythm.', 'This exercise is complete.'][currentIndex] || '';
+    }
+    
+    switch (currentIndex) {
+      case 0: return 'Arriving';
+      case 1: return 'Settling';
+      case 2: return breathCycleCount > 0 ? `Inhale (${breathCycleCount}/3)` : 'Inhale';
+      case 3: return breathCycleCount > 0 ? `Exhale (${breathCycleCount}/3)` : 'Exhale';
+      case 4: return 'Holding';
+      case 5: return 'Closing';
+      default: return '';
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -158,7 +291,7 @@ export default function PlaySomaticTrackScreen() {
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {currentIndex + 1} of {track.script.length}
+            {currentIndex + 1} of {totalSteps}
           </Text>
         </View>
 
@@ -166,7 +299,7 @@ export default function PlaySomaticTrackScreen() {
         {hasStarted ? (
           <View style={styles.textContainer}>
             <Text style={styles.currentText}>
-              {currentSegment ? currentSegment.text : 'Complete'}
+              {trackType === 'breath_settling' ? getBreathSettlingText() : (currentSegment ? currentSegment.text : 'Complete')}
             </Text>
           </View>
         ) : (
