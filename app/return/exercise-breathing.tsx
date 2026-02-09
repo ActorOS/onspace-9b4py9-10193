@@ -4,155 +4,28 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, wit
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
-import { userSettingsStorage } from '@/services/userSettingsStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
 
-type StepType = 'intro' | 'inhale' | 'hold' | 'exhale' | 'pause' | 'completion';
-
-interface Step {
-  type: StepType;
-  title: string;
-  instruction: string;
-  voiceScript?: string;
-  duration?: number; // in seconds
-  autoAdvance?: boolean;
-  silence?: number; // seconds of silence after voice
-}
-
-const STEPS: Step[] = [
-  {
-    type: 'intro',
-    title: 'Find Your Ground',
-    instruction: 'Sit comfortably. Feel your weight in the chair or on the floor.\n\nThe exercise will begin in a moment.',
-    voiceScript: 'Sit. Feel your weight. We will begin now.',
-    duration: 5,
-    autoAdvance: true,
-    silence: 2,
-  },
-  {
-    type: 'pause',
-    title: 'Preparation',
-    instruction: 'Close your eyes or soften your gaze.\n\nNotice where you are right now.',
-    voiceScript: 'Close your eyes. Notice where you are.',
-    duration: 3,
-    autoAdvance: true,
-    silence: 3,
-  },
-  {
-    type: 'inhale',
-    title: 'Breathe In',
-    instruction: 'Inhale slowly through your nose',
-    voiceScript: 'In',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'hold',
-    title: 'Hold',
-    instruction: 'Hold the breath gently',
-    voiceScript: 'Hold',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'exhale',
-    title: 'Breathe Out',
-    instruction: 'Exhale slowly through your mouth',
-    voiceScript: 'Out',
-    duration: 6,
-    autoAdvance: true,
-  },
-  {
-    type: 'inhale',
-    title: 'Breathe In',
-    instruction: 'Inhale slowly through your nose',
-    voiceScript: 'In',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'hold',
-    title: 'Hold',
-    instruction: 'Hold the breath gently',
-    voiceScript: 'Hold',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'exhale',
-    title: 'Breathe Out',
-    instruction: 'Exhale slowly through your mouth',
-    voiceScript: 'Out',
-    duration: 6,
-    autoAdvance: true,
-  },
-  {
-    type: 'inhale',
-    title: 'Breathe In',
-    instruction: 'Inhale slowly through your nose',
-    voiceScript: 'In',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'hold',
-    title: 'Hold',
-    instruction: 'Hold the breath gently',
-    voiceScript: 'Hold',
-    duration: 4,
-    autoAdvance: true,
-  },
-  {
-    type: 'exhale',
-    title: 'Breathe Out',
-    instruction: 'Exhale slowly through your mouth',
-    voiceScript: 'Out',
-    duration: 6,
-    autoAdvance: true,
-  },
-  {
-    type: 'pause',
-    title: 'Notice',
-    instruction: 'Notice how your body feels now.\n\nWhat has shifted?',
-    voiceScript: 'Notice what changed.',
-    duration: 5,
-    autoAdvance: true,
-    silence: 5,
-  },
-  {
-    type: 'completion',
-    title: 'You Have Returned',
-    instruction: 'Your breath is your own.\nThe character does not breathe through you.\n\nYou are here.',
-    voiceScript: 'Your breath is yours. You are here.',
-  },
-];
+// Exercise runs entirely on audio playback
+// No manual steps needed - the audio guides the entire experience
 
 export default function BreathingExerciseScreen() {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceSettings, setVoiceSettings] = useState({ rate: 0.65, pitch: 0.9, volume: 0.75 });
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const [audioError, setAudioError] = useState(false);
 
   const breathScale = useSharedValue(1);
-  const currentStep = STEPS[currentStepIndex];
 
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Load voice settings from user preferences
-        const settings = await userSettingsStorage.getSettings();
-        const pitch = settings.voiceStyle === 'warmMale' ? 0.8 : settings.voiceStyle === 'warmFemale' ? 1.0 : 0.9;
-        setVoiceSettings({
-          rate: settings.voiceSpeed * 0.65,
-          pitch: pitch,
-          volume: settings.voiceVolume / 100,
-        });
-
         const roleId = await returnSessionStorage.getActiveRoleId();
         const session = await returnSessionStorage.saveExerciseSession({
           createdAt: new Date().toISOString(),
@@ -169,62 +42,45 @@ export default function BreathingExerciseScreen() {
     initSession();
 
     return () => {
-      Speech.stop();
+      if (sound) {
+        sound.unloadAsync();
+      }
     };
   }, []);
 
-  useEffect(() => {
-    if (!hasStarted) return;
+  const loadAndPlayAudio = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
 
-    // Play voice narration
-    if (voiceEnabled && currentStep.voiceScript) {
-      setTimeout(() => {
-        Speech.speak(currentStep.voiceScript!, {
-          rate: voiceSettings.rate,
-          pitch: voiceSettings.pitch,
-          volume: voiceSettings.volume,
-          language: 'en-US',
-        });
-      }, 300);
-    }
-
-    // Breathing animation
-    if (currentStep.type === 'inhale') {
-      breathScale.value = withTiming(1.4, { duration: 4000, easing: Easing.inOut(Easing.ease) });
-    } else if (currentStep.type === 'exhale') {
-      breathScale.value = withTiming(1, { duration: 6000, easing: Easing.inOut(Easing.ease) });
-    } else if (currentStep.type === 'hold') {
-      // Hold current scale
-    }
-
-    if (currentStep.duration && currentStep.autoAdvance) {
-      setCountdown(currentStep.duration);
-
-      const interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev === null || prev <= 1) {
-            clearInterval(interval);
-            // Auto-advance after a brief moment
-            setTimeout(() => {
-              if (currentStepIndex < STEPS.length - 1) {
-                setCurrentStepIndex(currentStepIndex + 1);
-              }
-            }, 500);
-            return null;
+      const { sound: audioSound } = await Audio.Sound.createAsync(
+        { uri: systemVoiceAudio.exerciseBreathing },
+        { shouldPlay: true, volume: 0.8 },
+        (status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setHasCompleted(true);
+            setIsPlaying(false);
           }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    } else {
-      setCountdown(null);
+        }
+      );
+      
+      setSound(audioSound);
+      setIsPlaying(true);
+      setAudioError(false);
+    } catch (error) {
+      console.log('Exercise audio playback failed, showing text fallback:', error);
+      setAudioError(true);
+      // Show completion after a reasonable duration for silent reading
+      setTimeout(() => setHasCompleted(true), 180000); // 3 minutes
     }
-  }, [currentStepIndex, currentStep, voiceEnabled, hasStarted]);
+  };
 
   const handleBegin = () => {
     setHasStarted(true);
-    setCurrentStepIndex(0);
+    loadAndPlayAudio();
   };
 
   const handleComplete = async () => {
@@ -254,7 +110,9 @@ export default function BreathingExerciseScreen() {
   };
 
   const handleExit = () => {
-    Speech.stop();
+    if (sound) {
+      sound.stopAsync();
+    }
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
@@ -265,21 +123,7 @@ export default function BreathingExerciseScreen() {
     );
   };
 
-  const toggleVoice = () => {
-    setVoiceEnabled(!voiceEnabled);
-    if (voiceEnabled) {
-      Speech.stop();
-    }
-  };
 
-  const getStepColor = () => {
-    switch (currentStep.type) {
-      case 'inhale': return colors.primary;
-      case 'hold': return colors.accent;
-      case 'exhale': return colors.textPrimary;
-      default: return colors.textSecondary;
-    }
-  };
 
   const breathAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -294,27 +138,10 @@ export default function BreathingExerciseScreen() {
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Breathing & Release</Text>
-        <Pressable onPress={toggleVoice} style={styles.headerButton}>
-          <MaterialIcons 
-            name={voiceEnabled ? "volume-up" : "volume-off"} 
-            size={24} 
-            color={voiceEnabled ? colors.primary : colors.textTertiary} 
-          />
-        </Pressable>
+        <View style={styles.headerButton} />
       </View>
 
       <View style={styles.content}>
-        {hasStarted && (
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }
-              ]} 
-            />
-          </View>
-        )}
-
         <View style={styles.stepContainer}>
           {!hasStarted ? (
             <>
@@ -328,24 +155,26 @@ export default function BreathingExerciseScreen() {
                 Once you begin, you can close your eyes and follow the voice guidance—no interaction needed.
               </Text>
             </>
+          ) : audioError ? (
+            <>
+              <Text style={styles.errorTitle}>Audio Unavailable</Text>
+              <Text style={styles.errorText}>
+                The audio track could not be loaded. Please sit comfortably and follow your own breathing rhythm:
+                {'\n\n'}
+                Breathe in slowly through your nose for 4 counts.
+                {'\n'}
+                Hold gently for 4 counts.
+                {'\n'}
+                Breathe out through your mouth for 6 counts.
+                {'\n\n'}
+                Repeat 3 times, then notice how your body feels.
+              </Text>
+            </>
           ) : (
             <>
-              <Text style={[styles.stepTitle, { color: getStepColor() }]}>
-                {currentStep.title}
-              </Text>
-
-              {(currentStep.type === 'inhale' || currentStep.type === 'exhale' || currentStep.type === 'hold') && (
-                <Animated.View style={[styles.breathCircle, breathAnimatedStyle, { borderColor: getStepColor() }]} />
-              )}
-
-              {countdown !== null && countdown > 0 && (
-                <View style={styles.countdownCircle}>
-                  <Text style={styles.countdownText}>{countdown}</Text>
-                </View>
-              )}
-
-              <Text style={styles.stepInstruction}>
-                {currentStep.instruction}
+              <Animated.View style={[styles.breathCircle, breathAnimatedStyle]} />
+              <Text style={styles.playingText}>
+                {isPlaying ? 'Follow the voice guidance' : 'Exercise in progress'}
               </Text>
             </>
           )}
@@ -358,7 +187,7 @@ export default function BreathingExerciseScreen() {
             <Text style={styles.beginButtonText}>Begin Exercise</Text>
             <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </Pressable>
-        ) : currentStep.type === 'completion' ? (
+        ) : hasCompleted ? (
           <Pressable style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>I Have Returned</Text>
             <MaterialIcons name="check" size={20} color={colors.background} />
@@ -437,30 +266,28 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     marginBottom: spacing.xl,
   },
-  countdownCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.surface,
-    borderWidth: 4,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
-  },
-  countdownText: {
-    fontSize: 56,
-    fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
-    color: colors.primary,
-  },
-  stepInstruction: {
+  playingText: {
     fontSize: typography.sizes.lg,
     fontFamily: typography.fonts.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 28,
-    paddingHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+  },
+  errorTitle: {
+    fontSize: typography.sizes.xxl,
+    fontFamily: typography.fonts.displayBold,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  errorText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: spacing.xl,
   },
   welcomeTitle: {
     fontSize: typography.sizes.xxl,
