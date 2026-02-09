@@ -9,15 +9,16 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 
-// Sequenced breathing exercise with voice-led guidance
-// Audio plays automatically with controlled silence between steps
-// No user interaction needed once started
+// Detailed sequenced breathing exercise with voice-led guidance
+// 8-segment flow with repetition cycles for deep settling
+// No user interaction needed once started - fully hands-free
 
 export default function BreathingExerciseScreen() {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState<'arrival' | 'inhale' | 'exhale' | 'return' | 'complete'>('arrival');
+  const [currentStep, setCurrentStep] = useState<'arrival' | 'settle' | 'inhale' | 'exhale' | 'repeat' | 'quiet' | 'return' | 'complete'>('arrival');
+  const [cycleCount, setCycleCount] = useState(0);
   const [audioError, setAudioError] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -33,7 +34,7 @@ export default function BreathingExerciseScreen() {
           createdAt: new Date().toISOString(),
           roleId,
           exerciseType: 'breathing_release',
-          durationMinutes: 5,
+          durationMinutes: 8,
           completed: false,
         });
         setSessionId(session.id);
@@ -100,14 +101,14 @@ export default function BreathingExerciseScreen() {
 
   const startBreathAnimation = (type: 'inhale' | 'exhale' | 'neutral') => {
     if (type === 'inhale') {
-      breathScale.value = withTiming(1.4, { duration: 4000, easing: Easing.inOut(Easing.ease) });
-      breathOpacity.value = withTiming(0.8, { duration: 4000 });
+      breathScale.value = withTiming(1.5, { duration: 4000, easing: Easing.inOut(Easing.ease) });
+      breathOpacity.value = withTiming(0.85, { duration: 4000 });
     } else if (type === 'exhale') {
       breathScale.value = withTiming(1, { duration: 6000, easing: Easing.inOut(Easing.ease) });
       breathOpacity.value = withTiming(0.3, { duration: 6000 });
     } else {
-      breathScale.value = withTiming(1, { duration: 1000 });
-      breathOpacity.value = withTiming(0.3, { duration: 1000 });
+      breathScale.value = withTiming(1.15, { duration: 2000 });
+      breathOpacity.value = withTiming(0.4, { duration: 2000 });
     }
   };
 
@@ -117,26 +118,57 @@ export default function BreathingExerciseScreen() {
       setCurrentStep('arrival');
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.arrival);
       await waitForAudioEnd(arrivalSound);
-      await wait(3000); // 3 second pause
+      await wait(4000); // 4 second pause
 
-      // Step 2: Inhale
+      // Step 2: Settle
+      setCurrentStep('settle');
+      startBreathAnimation('neutral');
+      const settleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.settle);
+      await waitForAudioEnd(settleSound);
+      await wait(4000); // 4 second pause
+
+      // Step 3: First guided inhale
       setCurrentStep('inhale');
       startBreathAnimation('inhale');
-      const inhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.inhale);
-      await waitForAudioEnd(inhaleSound);
+      const inhale1Sound = await playAudioStep(systemVoiceAudio.exerciseBreathing.inhale4);
+      await waitForAudioEnd(inhale1Sound);
       await wait(4000); // 4 second inhale hold
 
-      // Step 3: Exhale
+      // Step 4: First guided exhale
       setCurrentStep('exhale');
       startBreathAnimation('exhale');
-      const exhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.exhale);
-      await waitForAudioEnd(exhaleSound);
+      const exhale1Sound = await playAudioStep(systemVoiceAudio.exerciseBreathing.exhale6);
+      await waitForAudioEnd(exhale1Sound);
       await wait(6000); // 6 second exhale hold
 
-      // Step 4: Return
-      setCurrentStep('return');
+      // Steps 5-6: Repeat cycles (3 times total)
+      for (let i = 0; i < 3; i++) {
+        setCycleCount(i + 1);
+        setCurrentStep('repeat');
+
+        // Inhale cue
+        startBreathAnimation('inhale');
+        const repeatInhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.repeatCue);
+        await waitForAudioEnd(repeatInhaleSound);
+        await wait(4000); // 4 second inhale hold
+
+        // Exhale cue
+        startBreathAnimation('exhale');
+        const repeatExhaleSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.repeatExhaleCue);
+        await waitForAudioEnd(repeatExhaleSound);
+        await wait(6000); // 6 second exhale hold
+      }
+
+      // Step 7: Quiet hold
+      setCurrentStep('quiet');
       startBreathAnimation('neutral');
-      const returnSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.return);
+      const quietSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.quietHold);
+      await waitForAudioEnd(quietSound);
+      await wait(30000); // 30 second silent hold
+
+      // Step 8: Return and close
+      setCurrentStep('return');
+      const returnSound = await playAudioStep(systemVoiceAudio.exerciseBreathing.returnClose);
       await waitForAudioEnd(returnSound);
 
       // Complete
@@ -209,15 +241,43 @@ export default function BreathingExerciseScreen() {
     }
     switch (currentStep) {
       case 'arrival':
-        return 'Settling in';
+        return 'Arriving';
+      case 'settle':
+        return 'Settling';
       case 'inhale':
         return 'Breathe in';
       case 'exhale':
         return 'Breathe out';
+      case 'repeat':
+        return cycleCount > 0 ? `Cycle ${cycleCount} of 3` : 'Breathing';
+      case 'quiet':
+        return 'Quiet hold';
       case 'return':
         return 'Returning';
       case 'complete':
         return 'Complete';
+      default:
+        return '';
+    }
+  };
+
+  const getStepDescription = () => {
+    if (audioError) return 'Continue with natural breathing';
+    
+    switch (currentStep) {
+      case 'arrival':
+        return 'Finding your place';
+      case 'settle':
+        return 'Allowing yourself to be here';
+      case 'inhale':
+      case 'exhale':
+        return 'Following the voice guidance';
+      case 'repeat':
+        return 'Breathing with the rhythm';
+      case 'quiet':
+        return 'Resting in stillness';
+      case 'return':
+        return 'Coming back';
       default:
         return '';
     }
@@ -240,17 +300,20 @@ export default function BreathingExerciseScreen() {
               <MaterialIcons name="spa" size={64} color={colors.primary} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Breathing & Release</Text>
               <Text style={styles.welcomeText}>
-                A 5-minute guided exercise to return your nervous system to baseline.
+                An 8-minute guided exercise to return your nervous system to baseline.
                 {'\n\n'}
-                Find a comfortable seated position.
+                Find a comfortable seated position. You may close your eyes once you begin.
                 {'\n\n'}
-                Once you begin, you can close your eyes and follow the voice guidance—no interaction needed.
+                The voice will guide you through arrival, settling, breathing cycles, and a quiet hold before returning.
+                {'\n\n'}
+                No interaction needed—just listen and breathe.
               </Text>
             </>
           ) : (
             <>
               <Animated.View style={[styles.breathCircle, breathAnimatedStyle]} />
               <Text style={styles.stepMessage}>{getStepMessage()}</Text>
+              <Text style={styles.stepDescription}>{getStepDescription()}</Text>
               {audioError && (
                 <Text style={styles.fallbackText}>
                   Continue with your natural breathing rhythm
@@ -330,6 +393,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'center',
     marginTop: spacing.lg,
+  },
+  stepDescription: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
   },
   fallbackText: {
     fontSize: typography.sizes.md,

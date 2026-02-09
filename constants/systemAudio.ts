@@ -17,10 +17,14 @@ export const systemVoiceAudio = {
    * Voice-guided exercises for Return to Self flow
    */
   exerciseBreathing: {
-    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing/breathing_01_breath.mp3',
-    inhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing/breathing_02_inhale.mp3',
-    exhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing/breathing_03_exhale.mp3',
-    return: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing/breathing_04_return.mp3',
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_01_arrival.mp3',
+    settle: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_02_settle.mp3',
+    inhale4: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_03_exhale_4.mp3',
+    exhale6: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_04_exhale_6.mp3',
+    repeatCue: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_05_repeat_cue.mp3',
+    repeatExhaleCue: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breaathing_06_repeat_exhale_cue.mp3',
+    quietHold: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_07_quiet_hold.mp3',
+    returnClose: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_08_return_close.mp3',
   },
 } as const;
 
