@@ -3,14 +3,17 @@ import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Audio } from 'expo-av';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, Easing } from 'react-native-reanimated';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
 
 export default function ActorOSScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [dimensions, setDimensions] = useState({ width: 375, height: 667 });
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const scale = useSharedValue(0.85);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
@@ -37,8 +40,41 @@ export default function ActorOSScreen() {
       easing: Easing.out(Easing.cubic),
     });
 
-    return () => subscription?.remove();
+    // Load and play onboarding audio
+    loadAndPlayAudio();
+
+    return () => {
+      subscription?.remove();
+      // Cleanup audio on unmount
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, []);
+
+  const loadAndPlayAudio = async () => {
+    try {
+      // Configure audio mode for playback
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+
+      // Load the onboarding audio
+      const { sound: audioSound } = await Audio.Sound.createAsync(
+        { uri: systemVoiceAudio.onboardingIntro },
+        { shouldPlay: true, volume: 0.8 },
+        null
+      );
+      
+      setSound(audioSound);
+    } catch (error) {
+      // Graceful fallback: Log error but continue silently
+      console.log('Onboarding audio playback failed, continuing without audio:', error);
+      // App continues to function normally without audio
+    }
+  };
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -52,6 +88,12 @@ export default function ActorOSScreen() {
 
   const handleContinue = async () => {
     try {
+      // Stop audio if playing
+      if (sound) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+      }
+      
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
       // Navigate to home and prevent back navigation
