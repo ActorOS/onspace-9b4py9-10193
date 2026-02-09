@@ -26,6 +26,23 @@ export const systemVoiceAudio = {
     quietHold: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_07_quiet_hold.mp3',
     returnClose: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breathing.1/breathing_08_return_close.mp3',
   },
+
+  /**
+   * Body Scan Exercise
+   * 10-step voice-guided body scan from feet to head
+   */
+  exerciseBodyScan: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_01_arrival.mp3',
+    grounding: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_02_grounding.mp3',
+    feet: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_03_feet.mp3',
+    legs: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_04_legs.mp3',
+    pelvis: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_05_pelvis.mp3',
+    torso: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_06_torso.mp3',
+    shouldersArms: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_07_shoulders_arms.mp3',
+    neckFace: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_08_neck_face.mp3',
+    wholeBody: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_09_whole_body.mp3',
+    returnClose: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_10_return_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;

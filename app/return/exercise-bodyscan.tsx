@@ -1,143 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, cancelAnimation } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
-import { userSettingsStorage } from '@/services/userSettingsStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
 
-interface Step {
-  title: string;
-  instruction: string;
-  bodyPart: string;
-  voiceScript?: string;
-  pauseDuration: number; // in seconds
-  needsChoice?: boolean;
-  silence?: number; // seconds of silence after voice
-}
+// Detailed 10-step body scan exercise with voice-led guidance
+// Slow progression from feet to head with extended holds
+// Fully hands-free once started
 
-const STEPS: Step[] = [
-  {
-    title: 'Preparation',
-    instruction: 'Lie down or sit in a comfortable position.\n\nClose your eyes or soften your gaze.',
-    bodyPart: 'preparation',
-    voiceScript: 'Lie down. Close your eyes. We will begin.',
-    pauseDuration: 5,
-    silence: 3,
-  },
-  {
-    title: 'Feet',
-    instruction: 'Bring your attention to your feet.\n\nNotice any sensation, tension, or holding.',
-    bodyPart: 'feet',
-    voiceScript: 'Your feet.',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Legs',
-    instruction: 'Move your awareness slowly up through your legs.\n\nNotice what you are carrying there.',
-    bodyPart: 'legs',
-    voiceScript: 'Your legs.',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Torso',
-    instruction: 'Scan your lower back, abdomen, and chest.\n\nWhat does your core hold?',
-    bodyPart: 'torso',
-    voiceScript: 'Your torso. What does it hold?',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Shoulders',
-    instruction: 'Notice your shoulders and upper back.\n\nIs there weight here that is not yours?',
-    bodyPart: 'shoulders',
-    voiceScript: 'Your shoulders. Is the weight yours?',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Arms & Hands',
-    instruction: 'Move down through your arms to your hands.\n\nNotice what they have been doing.',
-    bodyPart: 'arms',
-    voiceScript: 'Your arms. Your hands.',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Neck & Throat',
-    instruction: 'Bring awareness to your neck and throat.\n\nNotice any tightness or constriction.',
-    bodyPart: 'neck',
-    voiceScript: 'Your neck. Your throat.',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Face & Head',
-    instruction: 'Scan your jaw, face, and scalp.\n\nNotice what expression you have been holding.',
-    bodyPart: 'head',
-    voiceScript: 'Your face. What expression are you holding?',
-    pauseDuration: 5,
-    needsChoice: true,
-    silence: 5,
-  },
-  {
-    title: 'Release',
-    instruction: 'Acknowledge what the character left behind in your body.\n\nWith each exhale, let it go.',
-    bodyPart: 'release',
-    voiceScript: 'Let it go now.',
-    pauseDuration: 8,
-    silence: 8,
-  },
-  {
-    title: 'Return',
-    instruction: 'This body is yours.\nYou are the one who lives here.\n\nWhen you are ready, open your eyes.',
-    bodyPart: 'completion',
-    voiceScript: 'This body is yours.',
-    pauseDuration: 0,
-  },
-];
+type ScanStep = 
+  | 'arrival' 
+  | 'grounding' 
+  | 'feet' 
+  | 'legs' 
+  | 'pelvis' 
+  | 'torso' 
+  | 'shoulders' 
+  | 'neck' 
+  | 'whole' 
+  | 'return' 
+  | 'complete';
 
 export default function BodyScanExerciseScreen() {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceSettings, setVoiceSettings] = useState({ rate: 0.65, pitch: 0.9, volume: 0.75 });
+  const [currentStep, setCurrentStep] = useState<ScanStep>('arrival');
+  const [audioError, setAudioError] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const pulseOpacity = useSharedValue(0.6);
-  const currentStep = STEPS[currentStepIndex];
+  const scanOpacity = useSharedValue(0.4);
 
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Load voice settings from user preferences
-        const settings = await userSettingsStorage.getSettings();
-        const pitch = settings.voiceStyle === 'warmMale' ? 0.8 : settings.voiceStyle === 'warmFemale' ? 1.0 : 0.9;
-        setVoiceSettings({
-          rate: settings.voiceSpeed * 0.65,
-          pitch: pitch,
-          volume: settings.voiceVolume / 100,
-        });
-
         const roleId = await returnSessionStorage.getActiveRoleId();
         const session = await returnSessionStorage.saveExerciseSession({
           createdAt: new Date().toISOString(),
           roleId,
           exerciseType: 'body_scan',
-          durationMinutes: 10,
+          durationMinutes: 12,
           completed: false,
         });
         setSessionId(session.id);
@@ -147,62 +55,148 @@ export default function BodyScanExerciseScreen() {
     };
     initSession();
 
-    // Gentle pulse animation
-    pulseOpacity.value = withRepeat(
-      withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
-    );
-
     return () => {
-      Speech.stop();
-      cancelAnimation(pulseOpacity);
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, []);
 
-  useEffect(() => {
-    if (!hasStarted) return;
-    
-    // Play voice narration
-    if (voiceEnabled && currentStep.voiceScript) {
-      setTimeout(() => {
-        Speech.speak(currentStep.voiceScript!, {
-          rate: voiceSettings.rate,
-          pitch: voiceSettings.pitch,
-          volume: voiceSettings.volume,
-          language: 'en-US',
-        });
-      }, 300);
-    }
-    
-    if (currentStep.pauseDuration > 0) {
-      setCountdown(currentStep.pauseDuration);
+  const playAudioStep = async (url: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
 
-      const interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev === null || prev <= 1) {
-            clearInterval(interval);
-            // Auto-advance after countdown
-            setTimeout(() => {
-              if (currentStepIndex < STEPS.length - 1) {
-                setCurrentStepIndex(currentStepIndex + 1);
-              }
-            }, 500);
-            return null;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
 
-      return () => clearInterval(interval);
-    } else {
-      setCountdown(null);
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, volume: 0.85 }
+      );
+      
+      soundRef.current = sound;
+      return sound;
+    } catch (error) {
+      console.log('Audio step failed:', error);
+      throw error;
     }
-  }, [currentStepIndex, currentStep, voiceEnabled, hasStarted]);
+  };
+
+  const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
+    return new Promise((resolve) => {
+      const checkStatus = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.didJustFinish) {
+          resolve();
+        } else {
+          timeoutRef.current = setTimeout(checkStatus, 100);
+        }
+      };
+      checkStatus();
+    });
+  };
+
+  const wait = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      timeoutRef.current = setTimeout(resolve, ms);
+    });
+  };
+
+  const startScanAnimation = (area: string) => {
+    // Subtle pulse for current body area focus
+    scanOpacity.value = withTiming(0.75, { duration: 2000, easing: Easing.inOut(Easing.ease) });
+  };
+
+  const runBodyScanSequence = async () => {
+    try {
+      // Step 1: Arrival
+      setCurrentStep('arrival');
+      startScanAnimation('arrival');
+      const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.arrival);
+      await waitForAudioEnd(arrivalSound);
+      await wait(4000); // 4 second pause
+
+      // Step 2: Grounding
+      setCurrentStep('grounding');
+      startScanAnimation('grounding');
+      const groundingSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.grounding);
+      await waitForAudioEnd(groundingSound);
+      await wait(6000); // 6 second pause
+
+      // Step 3: Feet
+      setCurrentStep('feet');
+      startScanAnimation('feet');
+      const feetSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.feet);
+      await waitForAudioEnd(feetSound);
+      await wait(10000); // 10 second hold
+
+      // Step 4: Legs
+      setCurrentStep('legs');
+      startScanAnimation('legs');
+      const legsSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.legs);
+      await waitForAudioEnd(legsSound);
+      await wait(12000); // 12 second hold
+
+      // Step 5: Pelvis
+      setCurrentStep('pelvis');
+      startScanAnimation('pelvis');
+      const pelvisSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.pelvis);
+      await waitForAudioEnd(pelvisSound);
+      await wait(12000); // 12 second hold
+
+      // Step 6: Torso
+      setCurrentStep('torso');
+      startScanAnimation('torso');
+      const torsoSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.torso);
+      await waitForAudioEnd(torsoSound);
+      await wait(15000); // 15 second hold
+
+      // Step 7: Shoulders & Arms
+      setCurrentStep('shoulders');
+      startScanAnimation('shoulders');
+      const shouldersSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.shouldersArms);
+      await waitForAudioEnd(shouldersSound);
+      await wait(12000); // 12 second hold
+
+      // Step 8: Neck & Face
+      setCurrentStep('neck');
+      startScanAnimation('neck');
+      const neckSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.neckFace);
+      await waitForAudioEnd(neckSound);
+      await wait(12000); // 12 second hold
+
+      // Step 9: Whole Body
+      setCurrentStep('whole');
+      startScanAnimation('whole');
+      const wholeSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.wholeBody);
+      await waitForAudioEnd(wholeSound);
+      await wait(30000); // 30 second integration hold
+
+      // Step 10: Return & Close
+      setCurrentStep('return');
+      const returnSound = await playAudioStep(systemVoiceAudio.exerciseBodyScan.returnClose);
+      await waitForAudioEnd(returnSound);
+
+      // Complete
+      setCurrentStep('complete');
+    } catch (error) {
+      console.log('Body scan sequence failed, showing text fallback:', error);
+      setAudioError(true);
+      setCurrentStep('complete');
+    }
+  };
 
   const handleBegin = () => {
     setHasStarted(true);
-    setCurrentStepIndex(0);
+    runBodyScanSequence();
   };
 
   const handleComplete = async () => {
@@ -232,7 +226,12 @@ export default function BodyScanExerciseScreen() {
   };
 
   const handleExit = () => {
-    Speech.stop();
+    if (soundRef.current) {
+      soundRef.current.stopAsync();
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
@@ -243,20 +242,95 @@ export default function BodyScanExerciseScreen() {
     );
   };
 
-  const toggleVoice = () => {
-    setVoiceEnabled(!voiceEnabled);
-    if (voiceEnabled) {
-      Speech.stop();
+  const scanAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: scanOpacity.value,
+    };
+  });
+
+  const getStepMessage = () => {
+    if (audioError) {
+      return 'Audio unavailable. Continue with silent body awareness.';
+    }
+    switch (currentStep) {
+      case 'arrival':
+        return 'Arriving';
+      case 'grounding':
+        return 'Grounding';
+      case 'feet':
+        return 'Feet';
+      case 'legs':
+        return 'Legs';
+      case 'pelvis':
+        return 'Pelvis & Hips';
+      case 'torso':
+        return 'Torso & Core';
+      case 'shoulders':
+        return 'Shoulders & Arms';
+      case 'neck':
+        return 'Neck & Face';
+      case 'whole':
+        return 'Whole Body';
+      case 'return':
+        return 'Returning';
+      case 'complete':
+        return 'Complete';
+      default:
+        return '';
     }
   };
 
+  const getStepDescription = () => {
+    if (audioError) return 'Scan your body with awareness';
+    
+    switch (currentStep) {
+      case 'arrival':
+        return 'Finding your position';
+      case 'grounding':
+        return 'Settling into the ground';
+      case 'feet':
+        return 'Noticing your foundation';
+      case 'legs':
+        return 'Awareness moving through legs';
+      case 'pelvis':
+        return 'Center of stability';
+      case 'torso':
+        return 'Your breathing space';
+      case 'shoulders':
+        return 'Release what you carry';
+      case 'neck':
+        return 'Expression and voice';
+      case 'whole':
+        return 'Integration and wholeness';
+      case 'return':
+        return 'This body is yours';
+      default:
+        return '';
+    }
+  };
 
-
-  const pulseAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: pulseOpacity.value,
-    };
-  });
+  const getBodyIcon = (): string => {
+    switch (currentStep) {
+      case 'arrival':
+      case 'grounding':
+        return 'self-improvement';
+      case 'feet':
+      case 'legs':
+        return 'directions-walk';
+      case 'pelvis':
+      case 'torso':
+        return 'favorite';
+      case 'shoulders':
+        return 'accessibility';
+      case 'neck':
+        return 'face';
+      case 'whole':
+      case 'return':
+        return 'spa';
+      default:
+        return 'self-improvement';
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -265,58 +339,41 @@ export default function BodyScanExerciseScreen() {
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Body Scan</Text>
-        <Pressable onPress={toggleVoice} style={styles.headerButton}>
-          <MaterialIcons 
-            name={voiceEnabled ? "volume-up" : "volume-off"} 
-            size={24} 
-            color={voiceEnabled ? colors.primary : colors.textTertiary} 
-          />
-        </Pressable>
+        <View style={styles.headerButton} />
       </View>
 
       <View style={styles.content}>
-        {hasStarted && (
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }
-              ]} 
-            />
-          </View>
-        )}
-
         <View style={styles.stepContainer}>
           {!hasStarted ? (
             <>
               <MaterialIcons name="self-improvement" size={64} color={colors.accent} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Body Scan</Text>
               <Text style={styles.welcomeText}>
-                A 10-minute guided exercise to release character tension held in the body.
+                A 12-minute guided journey through your body to release character tension and return to yourself.
                 {'\n\n'}
-                Find a comfortable position—lying down or seated.
+                Find a comfortable position—lying down or seated with support.
                 {'\n\n'}
-                Once you begin, you can close your eyes and follow the voice guidance through each part of your body.
+                The voice will guide you from feet to head, pausing at each area to allow awareness and release.
+                {'\n\n'}
+                No interaction needed—just listen, feel, and let go.
               </Text>
             </>
           ) : (
             <>
-              <Text style={styles.stepTitle}>
-                {currentStep.title}
-              </Text>
-
-              {countdown !== null && countdown > 0 && (
-                <>
-                  <Animated.View style={[styles.pulseIndicator, pulseAnimatedStyle]} />
-                  <View style={styles.countdownCircle}>
-                    <Text style={styles.countdownText}>{countdown}</Text>
-                  </View>
-                </>
+              <Animated.View style={[styles.bodyIcon, scanAnimatedStyle]}>
+                <MaterialIcons 
+                  name={getBodyIcon() as any} 
+                  size={80} 
+                  color={colors.primary} 
+                />
+              </Animated.View>
+              <Text style={styles.stepMessage}>{getStepMessage()}</Text>
+              <Text style={styles.stepDescription}>{getStepDescription()}</Text>
+              {audioError && (
+                <Text style={styles.fallbackText}>
+                  Continue with natural body awareness
+                </Text>
               )}
-
-              <Text style={styles.stepInstruction}>
-                {currentStep.instruction}
-              </Text>
             </>
           )}
         </View>
@@ -328,7 +385,7 @@ export default function BodyScanExerciseScreen() {
             <Text style={styles.beginButtonText}>Begin Exercise</Text>
             <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </Pressable>
-        ) : currentStep.bodyPart === 'completion' ? (
+        ) : currentStep === 'complete' ? (
           <Pressable style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>I Have Returned</Text>
             <MaterialIcons name="check" size={20} color={colors.background} />
@@ -371,64 +428,40 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.md,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-  },
   stepContainer: {
     flex: 1,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pulseIndicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    marginBottom: spacing.md,
-  },
-  stepTitle: {
-    fontSize: typography.sizes.xxl,
-    fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
-    color: colors.primary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    letterSpacing: typography.letterSpacing.title,
-  },
-  countdownCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.surface,
-    borderWidth: 3,
-    borderColor: colors.primary,
+  bodyIcon: {
+    marginBottom: spacing.xl * 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.xl,
   },
-  countdownText: {
-    fontSize: 36,
+  stepMessage: {
+    fontSize: typography.sizes.xl,
     fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
-    color: colors.primary,
+    fontWeight: typography.weights.semibold,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginTop: spacing.lg,
   },
-  stepInstruction: {
-    fontSize: typography.sizes.lg,
+  stepDescription: {
+    fontSize: typography.sizes.md,
     fontFamily: typography.fonts.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 28,
-    paddingHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
+  },
+  fallbackText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.xl,
   },
   welcomeTitle: {
     fontSize: typography.sizes.xxl,
@@ -468,7 +501,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     minHeight: 90,
   },
-
   completeButton: {
     flexDirection: 'row',
     alignItems: 'center',
