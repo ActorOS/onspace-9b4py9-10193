@@ -51,12 +51,16 @@ export default function PlaySomaticTrackScreen() {
       // Cleanup on unmount
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
       if (soundRef.current) {
+        soundRef.current.setOnPlaybackStatusUpdate(null);
         soundRef.current.unloadAsync();
+        soundRef.current = null;
       }
       Speech.stop();
     };
@@ -136,10 +140,6 @@ export default function PlaySomaticTrackScreen() {
   // Voice-led Breath Settling sequence
   const playAudioStep = async (url: string) => {
     try {
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-      }
-
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: false,
@@ -148,10 +148,11 @@ export default function PlaySomaticTrackScreen() {
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: url },
-        { shouldPlay: true, volume: 0.85 }
+        { shouldPlay: true, volume: 0.85 },
+        null, // Don't set status update here, we'll do it in waitForAudioEnd
+        false // Don't download first
       );
       
-      soundRef.current = sound;
       return sound;
     } catch (error) {
       console.log('Audio step failed:', error);
@@ -161,15 +162,12 @@ export default function PlaySomaticTrackScreen() {
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve) => {
-      const checkStatus = async () => {
-        const status = await sound.getStatusAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null); // Clear listener
           resolve();
-        } else {
-          timeoutRef.current = setTimeout(checkStatus, 100);
         }
-      };
-      checkStatus();
+      });
     });
   };
 
@@ -216,12 +214,14 @@ export default function PlaySomaticTrackScreen() {
       startBreathAnimation('neutral');
       const arrivalSound = await playAudioStep(systemVoiceAudio.breathSettling.arrival);
       await waitForAudioEnd(arrivalSound);
+      await arrivalSound.unloadAsync();
       await wait(4000); // 4 second pause
 
       // Step 2: Settling
       setCurrentPhase('settling');
       const settlingSound = await playAudioStep(systemVoiceAudio.breathSettling.settling);
       await waitForAudioEnd(settlingSound);
+      await settlingSound.unloadAsync();
       await wait(6000); // 6 second pause
 
       // Steps 3-4: Breath cycles (3 times)
@@ -233,12 +233,14 @@ export default function PlaySomaticTrackScreen() {
         startBreathAnimation('inhale');
         const inhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.inhale);
         await waitForAudioEnd(inhaleSound);
+        await inhaleSound.unloadAsync();
         await wait(4000); // 4 second hold
 
         // Exhale
         startBreathAnimation('exhale');
         const exhaleSound = await playAudioStep(systemVoiceAudio.breathSettling.exhale);
         await waitForAudioEnd(exhaleSound);
+        await exhaleSound.unloadAsync();
         await wait(6000); // 6 second hold
       }
 
@@ -247,14 +249,19 @@ export default function PlaySomaticTrackScreen() {
       startBreathAnimation('neutral');
       const holdSound = await playAudioStep(systemVoiceAudio.breathSettling.hold);
       await waitForAudioEnd(holdSound);
+      await holdSound.unloadAsync();
       await wait(20000); // 20 second hold
 
       // Step 6: Close
       setCurrentPhase('closing');
       const closeSound = await playAudioStep(systemVoiceAudio.breathSettling.close);
       await waitForAudioEnd(closeSound);
+      await closeSound.unloadAsync();
+      
+      // Final pause before showing completion
+      await wait(2000); // 2 second pause to let final audio settle
 
-      // Complete
+      // Complete - only after all audio and silence has finished
       setCurrentPhase('complete');
       setIsPlaying(false);
       fadeContent(true);
