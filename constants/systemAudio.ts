@@ -43,6 +43,22 @@ export const systemVoiceAudio = {
     wholeBody: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_09_whole_body.mp3',
     returnClose: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/body-scan/bodyscan_10_return_close.mp3',
   },
+
+  /**
+   * Identity Separation Exercise
+   * 9-step voice-guided process for separating self from role
+   */
+  exerciseIdentity: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_01_arrival.mp3',
+    nameSelf: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_02_name_self.mp3',
+    acknowledgeRole: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/idneity_03_ackowledge_role.mp3',
+    locateBoundary: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_04_locate_boundary.mp3',
+    separate: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_05_seperate.mp3',
+    returnToSelf: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_06_return_to_self.mp3',
+    releaseResponsibility: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_07_release_responsibility.mp3',
+    groundSelf: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_08_ground_self.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_09_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;

@@ -1,100 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, cancelAnimation } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
-import { userSettingsStorage } from '@/services/userSettingsStorage';
-import { roleStorage } from '@/services/roleStorage';
-import { sessionStorage } from '@/services/sessionStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
 
-interface Step {
-  type: 'intro' | 'reflection' | 'affirmation' | 'completion';
-  title: string;
-  instruction: string;
-  voiceScript?: string;
-  duration?: number;
-  silence?: number; // seconds of silence after voice
-}
+// 9-step voice-led Identity Separation exercise
+// Helps performers distinguish self from character
+// Fully hands-free once started
 
-const STEPS: Step[] = [
-  {
-    type: 'intro',
-    title: 'Separation Begins Here',
-    instruction: 'You are about to mark the boundary between yourself and the role.\n\nThis is a deliberate act of reclaiming your identity.',
-    voiceScript: 'Mark the boundary. Reclaim your identity. We will begin.',
-    duration: 5,
-    silence: 3,
-  },
-  {
-    type: 'reflection',
-    title: 'What Is Yours?',
-    instruction: 'Think of one thing that belongs to you, not the character.\n\nA memory, a person, a place, a feeling.\n\nStay with that for a moment.',
-    voiceScript: 'What belongs to you? Stay with that.',
-    duration: 8,
-    silence: 8,
-  },
-  {
-    type: 'affirmation',
-    title: 'Speak the Truth',
-    instruction: 'Listen, and repeat after me.',
-    voiceScript: '',
-    duration: 0,
-  },
-  {
-    type: 'completion',
-    title: 'I Am Myself',
-    instruction: 'The separation is complete.\n\nYou are no longer carrying them.\nYou are here, as yourself.',
-    voiceScript: 'You are no longer carrying them.',
-  },
-];
+type IdentityStep = 
+  | 'arrival' 
+  | 'nameSelf' 
+  | 'acknowledgeRole' 
+  | 'locateBoundary' 
+  | 'separate' 
+  | 'returnToSelf' 
+  | 'releaseResponsibility' 
+  | 'groundSelf' 
+  | 'close' 
+  | 'complete';
 
 export default function IdentitySeparationScreen() {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [characterName, setCharacterName] = useState('');
-  const [userName, setUserName] = useState('');
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceSettings, setVoiceSettings] = useState({ rate: 0.65, pitch: 0.9, volume: 0.75 });
+  const [currentStep, setCurrentStep] = useState<IdentityStep>('arrival');
+  const [audioError, setAudioError] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const waveOpacity = useSharedValue(0.4);
-  const currentStep = STEPS[currentStepIndex];
 
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Load voice settings from user preferences
-        const settings = await userSettingsStorage.getSettings();
-        const pitch = settings.voiceStyle === 'warmMale' ? 0.8 : settings.voiceStyle === 'warmFemale' ? 1.0 : 0.9;
-        setVoiceSettings({
-          rate: settings.voiceSpeed * 0.65,
-          pitch: pitch,
-          volume: settings.voiceVolume / 100,
-        });
-
-        // Load character and user names
-        const activeSession = await sessionStorage.getActiveSession();
-        if (activeSession) {
-          const role = await roleStorage.getRole(activeSession.roleId);
-          if (role) {
-            setCharacterName(role.characterName);
-          }
-        }
-        // User name could come from settings if we add a profile
-        // For now, we'll use a generic prompt
-
         const roleId = await returnSessionStorage.getActiveRoleId();
         const session = await returnSessionStorage.saveExerciseSession({
           createdAt: new Date().toISOString(),
           roleId,
           exerciseType: 'identity_separation',
-          durationMinutes: 8,
+          durationMinutes: 10,
           completed: false,
         });
         setSessionId(session.id);
@@ -112,79 +62,128 @@ export default function IdentitySeparationScreen() {
     );
 
     return () => {
-      Speech.stop();
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       cancelAnimation(waveOpacity);
     };
   }, []);
 
-  useEffect(() => {
-    if (!hasStarted) return;
-    
-    // Special handling for affirmation step
-    if (currentStep.type === 'affirmation') {
-      const affirmationScript = `I am ${userName || 'myself'}. I am not ${characterName}. I return to myself now.`;
-      if (voiceEnabled) {
-        setTimeout(() => {
-          Speech.speak(affirmationScript, {
-            rate: voiceSettings.rate * 0.85, // Slower for affirmation
-            pitch: voiceSettings.pitch,
-            volume: voiceSettings.volume,
-            language: 'en-US',
-            onDone: () => {
-              // Auto-advance to completion after affirmation
-              setTimeout(() => {
-                if (currentStepIndex < STEPS.length - 1) {
-                  setCurrentStepIndex(currentStepIndex + 1);
-                }
-              }, 2000);
-            },
-          });
-        }, 500);
+  const playAudioStep = async (url: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
       }
-      return;
-    }
-    
-    // Play voice narration
-    if (voiceEnabled && currentStep.voiceScript) {
-      setTimeout(() => {
-        Speech.speak(currentStep.voiceScript!, {
-          rate: voiceSettings.rate,
-          pitch: voiceSettings.pitch,
-          volume: voiceSettings.volume,
-          language: 'en-US',
-        });
-      }, 300);
-    }
 
-    // Handle countdown and auto-advance
-    if (currentStep.duration && currentStep.duration > 0) {
-      setCountdown(currentStep.duration);
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
 
-      const interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev === null || prev <= 1) {
-            clearInterval(interval);
-            // Auto-advance after countdown
-            setTimeout(() => {
-              if (currentStepIndex < STEPS.length - 1) {
-                setCurrentStepIndex(currentStepIndex + 1);
-              }
-            }, 500);
-            return null;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    } else {
-      setCountdown(null);
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, volume: 0.85 }
+      );
+      
+      soundRef.current = sound;
+      return sound;
+    } catch (error) {
+      console.log('Audio step failed:', error);
+      throw error;
     }
-  }, [currentStepIndex, voiceEnabled, hasStarted, characterName, userName]);
+  };
+
+  const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
+    return new Promise((resolve) => {
+      const checkStatus = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.didJustFinish) {
+          resolve();
+        } else {
+          timeoutRef.current = setTimeout(checkStatus, 100);
+        }
+      };
+      checkStatus();
+    });
+  };
+
+  const wait = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      timeoutRef.current = setTimeout(resolve, ms);
+    });
+  };
+
+  const runIdentitySeparationSequence = async () => {
+    try {
+      // Step 1: Arrival
+      setCurrentStep('arrival');
+      const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.arrival);
+      await waitForAudioEnd(arrivalSound);
+      await wait(5000); // 5 second pause
+
+      // Step 2: Name Self
+      setCurrentStep('nameSelf');
+      const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.nameSelf);
+      await waitForAudioEnd(nameSelfSound);
+      await wait(8000); // 8 second hold
+
+      // Step 3: Acknowledge Role
+      setCurrentStep('acknowledgeRole');
+      const acknowledgeRoleSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.acknowledgeRole);
+      await waitForAudioEnd(acknowledgeRoleSound);
+      await wait(10000); // 10 second hold
+
+      // Step 4: Locate Boundary
+      setCurrentStep('locateBoundary');
+      const locateBoundarySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.locateBoundary);
+      await waitForAudioEnd(locateBoundarySound);
+      await wait(12000); // 12 second hold
+
+      // Step 5: Separate
+      setCurrentStep('separate');
+      const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.separate);
+      await waitForAudioEnd(separateSound);
+      await wait(20000); // 20 second hold (core separation moment)
+
+      // Step 6: Return to Self
+      setCurrentStep('returnToSelf');
+      const returnToSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.returnToSelf);
+      await waitForAudioEnd(returnToSelfSound);
+      await wait(12000); // 12 second hold
+
+      // Step 7: Release Responsibility
+      setCurrentStep('releaseResponsibility');
+      const releaseResponsibilitySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.releaseResponsibility);
+      await waitForAudioEnd(releaseResponsibilitySound);
+      await wait(15000); // 15 second hold
+
+      // Step 8: Ground Self
+      setCurrentStep('groundSelf');
+      const groundSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.groundSelf);
+      await waitForAudioEnd(groundSelfSound);
+      await wait(12000); // 12 second hold
+
+      // Step 9: Close
+      setCurrentStep('close');
+      const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.close);
+      await waitForAudioEnd(closeSound);
+
+      // Complete
+      setCurrentStep('complete');
+    } catch (error) {
+      console.log('Identity separation sequence failed, showing text fallback:', error);
+      setAudioError(true);
+      setCurrentStep('complete');
+    }
+  };
 
   const handleBegin = () => {
     setHasStarted(true);
-    setCurrentStepIndex(0);
+    runIdentitySeparationSequence();
   };
 
   const handleComplete = async () => {
@@ -203,7 +202,7 @@ export default function IdentitySeparationScreen() {
         source: 'release_return',
         completed: true,
         completionType: 'exercise',
-        notes: `Identity Separation: ${characterName} → ${userName}`,
+        notes: 'Identity Separation exercise completed',
       });
       
       router.replace('/(tabs)');
@@ -214,7 +213,12 @@ export default function IdentitySeparationScreen() {
   };
 
   const handleExit = () => {
-    Speech.stop();
+    if (soundRef.current) {
+      soundRef.current.stopAsync();
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
@@ -225,24 +229,90 @@ export default function IdentitySeparationScreen() {
     );
   };
 
-  const toggleVoice = () => {
-    setVoiceEnabled(!voiceEnabled);
-    if (voiceEnabled) {
-      Speech.stop();
-    }
-  };
-
-  const getAffirmationText = () => {
-    const user = userName || 'myself';
-    const character = characterName || 'the character';
-    return `I am ${user}.\n\nI am not ${character}.\n\nI return to myself now.`;
-  };
-
   const waveAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: waveOpacity.value,
     };
   });
+
+  const getStepMessage = () => {
+    if (audioError) {
+      return 'Audio unavailable. Continue with silent awareness.';
+    }
+    switch (currentStep) {
+      case 'arrival':
+        return 'Arriving';
+      case 'nameSelf':
+        return 'Your Name';
+      case 'acknowledgeRole':
+        return 'Acknowledging the Role';
+      case 'locateBoundary':
+        return 'Finding the Boundary';
+      case 'separate':
+        return 'Separation';
+      case 'returnToSelf':
+        return 'Returning to Self';
+      case 'releaseResponsibility':
+        return 'Release';
+      case 'groundSelf':
+        return 'Grounding';
+      case 'close':
+        return 'Closing';
+      case 'complete':
+        return 'Complete';
+      default:
+        return '';
+    }
+  };
+
+  const getStepDescription = () => {
+    if (audioError) return 'Notice the difference between self and role';
+    
+    switch (currentStep) {
+      case 'arrival':
+        return 'Taking your position';
+      case 'nameSelf':
+        return 'Who you are';
+      case 'acknowledgeRole':
+        return 'Who they are';
+      case 'locateBoundary':
+        return 'Where you end, they begin';
+      case 'separate':
+        return 'Making the distinction';
+      case 'returnToSelf':
+        return 'Coming back to your center';
+      case 'releaseResponsibility':
+        return 'Not yours to carry';
+      case 'groundSelf':
+        return 'Your feet, your breath, your name';
+      case 'close':
+        return 'The work is done';
+      default:
+        return '';
+    }
+  };
+
+  const getStepIcon = (): string => {
+    switch (currentStep) {
+      case 'arrival':
+        return 'self-improvement';
+      case 'nameSelf':
+      case 'acknowledgeRole':
+        return 'psychology';
+      case 'locateBoundary':
+      case 'separate':
+        return 'grain';
+      case 'returnToSelf':
+      case 'groundSelf':
+        return 'person';
+      case 'releaseResponsibility':
+        return 'spa';
+      case 'close':
+        return 'check-circle';
+      default:
+        return 'psychology';
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -251,57 +321,42 @@ export default function IdentitySeparationScreen() {
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Identity Separation</Text>
-        <Pressable onPress={toggleVoice} style={styles.headerButton}>
-          <MaterialIcons 
-            name={voiceEnabled ? "volume-up" : "volume-off"} 
-            size={24} 
-            color={voiceEnabled ? colors.textPrimary : colors.textTertiary} 
-          />
-        </Pressable>
+        <View style={styles.headerButton} />
       </View>
 
       <View style={styles.content}>
-        {hasStarted && (
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }
-              ]} 
-            />
-          </View>
-        )}
-
         <View style={styles.stepContainer}>
           {!hasStarted ? (
             <>
               <MaterialIcons name="psychology" size={64} color={colors.textPrimary} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Identity Separation</Text>
               <Text style={styles.welcomeText}>
-                An 8-minute guided exercise to distinguish self from character.
-                {characterName ? `\n\nYou have been holding ${characterName}.` : ''}
-                {userName ? `\n\nYou are ${userName}.` : ''}
-                {!userName && '\n\nWhat is your name? (Think of it before you begin.)'}
-                {characterName && '\n\nYou are about to separate.\n\nOnce you begin, you can close your eyes and follow the voice guidance.'}
+                A 10-minute guided process to distinguish yourself from the role you've been holding.
+                {'\n\n'}
+                Find a comfortable seated position. You may close your eyes once you begin.
+                {'\n\n'}
+                The voice will guide you through arrival, naming, boundary work, separation, and return to self.
+                {'\n\n'}
+                No interaction needed—just listen and allow the distinction to form.
               </Text>
             </>
           ) : (
             <>
-              <Animated.View style={[styles.waveIndicator, waveAnimatedStyle]} />
-              
-              <Text style={styles.stepTitle}>
-                {currentStep.title}
-              </Text>
-
-              {countdown !== null && countdown > 0 && (
-                <View style={styles.countdownCircle}>
-                  <Text style={styles.countdownText}>{countdown}</Text>
-                </View>
+              <View style={styles.iconContainer}>
+                <MaterialIcons 
+                  name={getStepIcon() as any} 
+                  size={80} 
+                  color={colors.primary} 
+                />
+                <Animated.View style={[styles.waveIndicator, waveAnimatedStyle]} />
+              </View>
+              <Text style={styles.stepMessage}>{getStepMessage()}</Text>
+              <Text style={styles.stepDescription}>{getStepDescription()}</Text>
+              {audioError && (
+                <Text style={styles.fallbackText}>
+                  Continue with awareness of your own identity
+                </Text>
               )}
-
-              <Text style={styles.stepInstruction}>
-                {currentStep.type === 'affirmation' ? getAffirmationText() : currentStep.instruction}
-              </Text>
             </>
           )}
         </View>
@@ -313,7 +368,7 @@ export default function IdentitySeparationScreen() {
             <Text style={styles.beginButtonText}>Begin Exercise</Text>
             <MaterialIcons name="play-arrow" size={24} color={colors.background} />
           </Pressable>
-        ) : currentStep.type === 'completion' ? (
+        ) : currentStep === 'complete' ? (
           <Pressable style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>I Have Returned</Text>
             <MaterialIcons name="check" size={20} color={colors.background} />
@@ -356,64 +411,47 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.md,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-  },
   stepContainer: {
     flex: 1,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  iconContainer: {
+    marginBottom: spacing.xl * 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   waveIndicator: {
     width: 80,
     height: 4,
     backgroundColor: colors.primary,
     borderRadius: 2,
-    marginBottom: spacing.xl,
+    marginTop: spacing.lg,
   },
-  stepTitle: {
-    fontSize: typography.sizes.xxl,
+  stepMessage: {
+    fontSize: typography.sizes.xl,
     fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
+    fontWeight: typography.weights.semibold,
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: spacing.xl,
-    letterSpacing: typography.letterSpacing.title,
+    marginTop: spacing.lg,
   },
-  stepInstruction: {
-    fontSize: typography.sizes.lg,
+  stepDescription: {
+    fontSize: typography.sizes.md,
     fontFamily: typography.fonts.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 28,
-    paddingHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
   },
-  countdownCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.surface,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: spacing.xl,
-  },
-  countdownText: {
-    fontSize: 36,
-    fontFamily: typography.fonts.displayBold,
-    fontWeight: typography.weights.bold,
-    color: colors.primary,
+  fallbackText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.xl,
   },
   welcomeTitle: {
     fontSize: typography.sizes.xxl,
@@ -453,7 +491,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     minHeight: 90,
   },
-
   completeButton: {
     flexDirection: 'row',
     alignItems: 'center',
