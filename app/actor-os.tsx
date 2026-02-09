@@ -7,7 +7,7 @@ import { Audio } from 'expo-av';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, Easing } from 'react-native-reanimated';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
-import { systemVoiceAudio } from '@/constants/systemAudio';
+import { SystemVoice } from '@/services/systemVoice';
 
 export default function ActorOSScreen() {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function ActorOSScreen() {
 
       // Load the onboarding audio
       const { sound: audioSound } = await Audio.Sound.createAsync(
-        { uri: systemVoiceAudio.onboardingIntro },
+        { uri: SystemVoice.onboarding.intro },
         { shouldPlay: true, volume: 0.8 },
         null
       );
