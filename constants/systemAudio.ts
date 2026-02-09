@@ -1,22 +1,16 @@
 /**
- * DEPRECATED: This file is deprecated.
+ * System Voice Audio URLs
  * 
- * Use `@/services/systemVoice` instead.
- * 
- * This file is kept temporarily for backward compatibility
- * but will be removed in a future version.
+ * Centralized source of truth for all system-narrated audio files.
+ * These are pre-recorded voice tracks for onboarding, tutorials, and system guidance.
  */
 
-import { SystemVoice } from '@/services/systemVoice';
-
-/**
- * @deprecated Use SystemVoice.onboarding.intro from '@/services/systemVoice' instead
- */
 export const systemVoiceAudio = {
-  onboardingIntro: SystemVoice.onboarding.intro,
+  /**
+   * Onboarding welcome message
+   * Played when user first enters Actor OS
+   */
+  onboardingIntro: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/onboarding_welcome_v1.mp3',
 } as const;
 
-/**
- * @deprecated Use SystemVoice types from '@/services/systemVoice' instead
- */
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
