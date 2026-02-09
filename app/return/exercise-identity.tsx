@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, cancelAnimation } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -54,6 +54,13 @@ export default function IdentitySeparationScreen() {
     };
     initSession();
 
+    // Gentle wave animation
+    waveOpacity.value = withRepeat(
+      withTiming(0.8, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+
     return () => {
       if (soundRef.current) {
         soundRef.current.unloadAsync();
@@ -61,6 +68,7 @@ export default function IdentitySeparationScreen() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      cancelAnimation(waveOpacity);
     };
   }, []);
 
@@ -109,71 +117,58 @@ export default function IdentitySeparationScreen() {
     });
   };
 
-  const startWaveAnimation = () => {
-    waveOpacity.value = withTiming(0.75, { duration: 2000, easing: Easing.inOut(Easing.ease) });
-  };
-
   const runIdentitySeparationSequence = async () => {
     try {
       // Step 1: Arrival
       setCurrentStep('arrival');
-      startWaveAnimation();
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.arrival);
       await waitForAudioEnd(arrivalSound);
       await wait(5000); // 5 second pause
 
       // Step 2: Name Self
       setCurrentStep('nameSelf');
-      startWaveAnimation();
       const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.nameSelf);
       await waitForAudioEnd(nameSelfSound);
       await wait(8000); // 8 second hold
 
       // Step 3: Acknowledge Role
       setCurrentStep('acknowledgeRole');
-      startWaveAnimation();
       const acknowledgeRoleSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.acknowledgeRole);
       await waitForAudioEnd(acknowledgeRoleSound);
       await wait(10000); // 10 second hold
 
       // Step 4: Locate Boundary
       setCurrentStep('locateBoundary');
-      startWaveAnimation();
       const locateBoundarySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.locateBoundary);
       await waitForAudioEnd(locateBoundarySound);
       await wait(12000); // 12 second hold
 
       // Step 5: Separate
       setCurrentStep('separate');
-      startWaveAnimation();
       const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.separate);
       await waitForAudioEnd(separateSound);
       await wait(20000); // 20 second hold (core separation moment)
 
       // Step 6: Return to Self
       setCurrentStep('returnToSelf');
-      startWaveAnimation();
       const returnToSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.returnToSelf);
       await waitForAudioEnd(returnToSelfSound);
       await wait(12000); // 12 second hold
 
       // Step 7: Release Responsibility
       setCurrentStep('releaseResponsibility');
-      startWaveAnimation();
       const releaseResponsibilitySound = await playAudioStep(systemVoiceAudio.exerciseIdentity.releaseResponsibility);
       await waitForAudioEnd(releaseResponsibilitySound);
       await wait(15000); // 15 second hold
 
       // Step 8: Ground Self
       setCurrentStep('groundSelf');
-      startWaveAnimation();
       const groundSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.groundSelf);
       await waitForAudioEnd(groundSelfSound);
       await wait(12000); // 12 second hold
 
       // Step 9: Close
       setCurrentStep('close');
-      startWaveAnimation();
       const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentity.close);
       await waitForAudioEnd(closeSound);
 
