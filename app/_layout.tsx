@@ -57,6 +57,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="return/exercise-identity-light" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="return/quick-name" 
           options={{ presentation: 'modal' }}
         />

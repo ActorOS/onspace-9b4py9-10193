@@ -59,6 +59,17 @@ export const systemVoiceAudio = {
     groundSelf: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_08_ground_self.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-seperation/identity_09_close.mp3',
   },
+
+  /**
+   * Identity Separation Light (4-step condensed version)
+   * Quick separation process for light workload sessions
+   */
+  exerciseIdentityLight: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_01_arrival.mp3',
+    nameSelf: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_02_name_self.mp3',
+    separate: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_03_separate.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/identity-light/identity_light_04_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;

@@ -1,0 +1,449 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Audio } from 'expo-av';
+import { colors, spacing, typography, borderRadius } from '@/constants/theme';
+import { returnSessionStorage } from '@/services/returnSessionStorage';
+import { systemVoiceAudio } from '@/constants/systemAudio';
+
+// Light Load Identity Separation - 4-step condensed version
+// Quick, efficient separation for light workload sessions
+// Fully hands-free once started
+
+type LightIdentityStep = 'arrival' | 'nameSelf' | 'separate' | 'close' | 'complete';
+
+export default function IdentitySeparationLightScreen() {
+  const router = useRouter();
+  const [hasStarted, setHasStarted] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<LightIdentityStep>('arrival');
+  const [audioError, setAudioError] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const waveOpacity = useSharedValue(0.4);
+
+  useEffect(() => {
+    const initSession = async () => {
+      try {
+        const roleId = await returnSessionStorage.getActiveRoleId();
+        const session = await returnSessionStorage.saveExerciseSession({
+          createdAt: new Date().toISOString(),
+          roleId,
+          exerciseType: 'identity_separation_light',
+          durationMinutes: 3,
+          completed: false,
+        });
+        setSessionId(session.id);
+      } catch (error) {
+        console.error('Failed to start exercise:', error);
+      }
+    };
+    initSession();
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const playAudioStep = async (url: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, volume: 0.85 }
+      );
+      
+      soundRef.current = sound;
+      return sound;
+    } catch (error) {
+      console.log('Audio step failed:', error);
+      throw error;
+    }
+  };
+
+  const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
+    return new Promise((resolve) => {
+      const checkStatus = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.didJustFinish) {
+          resolve();
+        } else {
+          timeoutRef.current = setTimeout(checkStatus, 100);
+        }
+      };
+      checkStatus();
+    });
+  };
+
+  const wait = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      timeoutRef.current = setTimeout(resolve, ms);
+    });
+  };
+
+  const startWaveAnimation = () => {
+    waveOpacity.value = withTiming(0.75, { duration: 2000, easing: Easing.inOut(Easing.ease) });
+  };
+
+  const runLightIdentitySequence = async () => {
+    try {
+      // Step 1: Arrival
+      setCurrentStep('arrival');
+      startWaveAnimation();
+      const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.arrival);
+      await waitForAudioEnd(arrivalSound);
+      await wait(4000); // 4 second pause
+
+      // Step 2: Name Self
+      setCurrentStep('nameSelf');
+      startWaveAnimation();
+      const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.nameSelf);
+      await waitForAudioEnd(nameSelfSound);
+      await wait(5000); // 5 second hold
+
+      // Step 3: Separate
+      setCurrentStep('separate');
+      startWaveAnimation();
+      const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.separate);
+      await waitForAudioEnd(separateSound);
+      await wait(12000); // 12 second hold
+
+      // Step 4: Close
+      setCurrentStep('close');
+      startWaveAnimation();
+      const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.close);
+      await waitForAudioEnd(closeSound);
+
+      // Complete
+      setCurrentStep('complete');
+    } catch (error) {
+      console.log('Light identity sequence failed, showing text fallback:', error);
+      setAudioError(true);
+      setCurrentStep('complete');
+    }
+  };
+
+  const handleBegin = () => {
+    setHasStarted(true);
+    runLightIdentitySequence();
+  };
+
+  const handleComplete = async () => {
+    if (!sessionId) return;
+    
+    try {
+      await returnSessionStorage.updateExerciseSession(sessionId, {
+        completed: true,
+        completionAt: new Date().toISOString(),
+      });
+      
+      const roleId = await returnSessionStorage.getActiveRoleId();
+      await returnSessionStorage.saveReturnSession({
+        createdAt: new Date().toISOString(),
+        roleId,
+        source: 'release_return',
+        completed: true,
+        completionType: 'exercise',
+        notes: 'Identity Separation (Light) exercise completed',
+      });
+      
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to complete exercise:', error);
+      Alert.alert('Error', 'Failed to complete exercise');
+    }
+  };
+
+  const handleExit = () => {
+    if (soundRef.current) {
+      soundRef.current.stopAsync();
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    Alert.alert(
+      'Exit Exercise',
+      'Are you sure you want to exit? Your progress will not be saved.',
+      [
+        { text: 'Stay', style: 'cancel' },
+        { text: 'Exit', style: 'destructive', onPress: () => router.back() },
+      ]
+    );
+  };
+
+  const waveAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: waveOpacity.value,
+    };
+  });
+
+  const getStepMessage = () => {
+    if (audioError) {
+      return 'Audio unavailable. Continue with silent awareness.';
+    }
+    switch (currentStep) {
+      case 'arrival':
+        return 'Arriving';
+      case 'nameSelf':
+        return 'Your Name';
+      case 'separate':
+        return 'Separation';
+      case 'close':
+        return 'Closing';
+      case 'complete':
+        return 'Complete';
+      default:
+        return '';
+    }
+  };
+
+  const getStepDescription = () => {
+    if (audioError) return 'Notice the boundary between self and role';
+    
+    switch (currentStep) {
+      case 'arrival':
+        return 'Taking your position';
+      case 'nameSelf':
+        return 'Who you are';
+      case 'separate':
+        return 'Making the distinction';
+      case 'close':
+        return 'The work is done';
+      default:
+        return '';
+    }
+  };
+
+  const getStepIcon = (): string => {
+    switch (currentStep) {
+      case 'arrival':
+        return 'self-improvement';
+      case 'nameSelf':
+        return 'psychology';
+      case 'separate':
+        return 'grain';
+      case 'close':
+        return 'check-circle';
+      default:
+        return 'psychology';
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <Pressable onPress={handleExit} style={styles.headerButton}>
+          <MaterialIcons name="close" size={24} color={colors.textPrimary} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Identity Separation</Text>
+        <View style={styles.headerButton} />
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.stepContainer}>
+          {!hasStarted ? (
+            <>
+              <MaterialIcons name="psychology" size={64} color={colors.textPrimary} style={{ marginBottom: spacing.xl }} />
+              <Text style={styles.welcomeTitle}>Identity Separation</Text>
+              <Text style={styles.subtitleText}>Light Version</Text>
+              <Text style={styles.welcomeText}>
+                A 3-minute guided process to distinguish yourself from the role.
+                {'\n\n'}
+                Find a comfortable position. You may close your eyes once you begin.
+                {'\n\n'}
+                Brief and grounded—arrival, naming, separation, return.
+              </Text>
+            </>
+          ) : (
+            <>
+              <View style={styles.iconContainer}>
+                <MaterialIcons 
+                  name={getStepIcon() as any} 
+                  size={80} 
+                  color={colors.primary} 
+                />
+                <Animated.View style={[styles.waveIndicator, waveAnimatedStyle]} />
+              </View>
+              <Text style={styles.stepMessage}>{getStepMessage()}</Text>
+              <Text style={styles.stepDescription}>{getStepDescription()}</Text>
+              {audioError && (
+                <Text style={styles.fallbackText}>
+                  Continue with awareness of your own identity
+                </Text>
+              )}
+            </>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        {!hasStarted ? (
+          <Pressable style={styles.beginButton} onPress={handleBegin}>
+            <Text style={styles.beginButtonText}>Begin Exercise</Text>
+            <MaterialIcons name="play-arrow" size={24} color={colors.background} />
+          </Pressable>
+        ) : currentStep === 'complete' ? (
+          <Pressable style={styles.completeButton} onPress={handleComplete}>
+            <Text style={styles.completeButtonText}>I Have Returned</Text>
+            <MaterialIcons name="check" size={20} color={colors.background} />
+          </Pressable>
+        ) : null}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: typography.sizes.lg,
+    fontFamily: typography.fonts.displayBold,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.title,
+  },
+  content: {
+    flex: 1,
+    paddingTop: spacing.md,
+  },
+  stepContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    marginBottom: spacing.xl * 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waveIndicator: {
+    width: 80,
+    height: 4,
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+    marginTop: spacing.lg,
+  },
+  stepMessage: {
+    fontSize: typography.sizes.xl,
+    fontFamily: typography.fonts.displayBold,
+    fontWeight: typography.weights.semibold,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginTop: spacing.lg,
+  },
+  stepDescription: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
+  },
+  fallbackText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.xl,
+  },
+  welcomeTitle: {
+    fontSize: typography.sizes.xxl,
+    fontFamily: typography.fonts.displayBold,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  subtitleText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.medium,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  welcomeText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: spacing.xl,
+  },
+  beginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+  },
+  beginButtonText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.semibold,
+    color: colors.background,
+  },
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    minHeight: 90,
+  },
+  completeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+  },
+  completeButtonText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.semibold,
+    color: colors.background,
+  },
+});
