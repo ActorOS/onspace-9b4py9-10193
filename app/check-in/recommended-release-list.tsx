@@ -21,6 +21,16 @@ type ExerciseOption = {
 
 const EXERCISE_OPTIONS: ExerciseOption[] = [
   {
+    id: 'gentle-grounding',
+    title: 'Gentle Grounding',
+    purpose: 'Sensory grounding to present moment',
+    duration: '6 min',
+    icon: 'my-location',
+    route: '/return/exercise-grounding',
+    workload: ['light'],
+    requiresPro: false,
+  },
+  {
     id: 'breathing',
     title: 'Breathing & Release',
     purpose: 'Gentle nervous system reset',
