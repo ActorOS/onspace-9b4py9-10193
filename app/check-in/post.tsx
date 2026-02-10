@@ -92,9 +92,9 @@ export default function PostCheckInScreen() {
         Alert.alert('Held', 'This has been recorded in your role container');
         router.replace('/(tabs)');
       } else {
-        // Navigate to post-work release recommendation screen
+        // Navigate to return choice screen
         router.replace({
-          pathname: '/check-in/post-work-release',
+          pathname: '/check-in/return-choice',
           params: { sessionId },
         });
       }
