@@ -1,37 +1,37 @@
-// Actor OS - Warm Linen Design System
-// Calm, warm, legible, emotionally containing
+// Actor OS - Warm Stone Design System
+// Grounded, warm, legible, emotionally containing
 export const colors = {
   // Base backgrounds
-  background: '#D8D1C3', // Warm linen / sand tone (primary background)
-  surface: '#E6DFD2', // Lighter warm tone (cards, containers)
-  surfaceElevated: '#EAE4D9', // Slightly elevated surfaces
+  background: '#C5BAAB', // Warm stone / theatre wall (darker, grounded base)
+  surface: '#D9D0C3', // Lighter warm tone (cards, containers) - clear contrast
+  surfaceElevated: '#E2DAD0', // Elevated surfaces (modals, overlays)
   
   // Text
-  textPrimary: '#2E2A24', // Deep warm charcoal (headings, key prompts)
-  textSecondary: '#5A544A', // Supporting copy
-  textTertiary: '#7A7266', // Helper text
+  textPrimary: '#2A2520', // Deep warm charcoal (headings, key prompts) - stronger
+  textSecondary: '#524D44', // Supporting copy - improved contrast
+  textTertiary: '#6E6860', // Helper text - still readable
   
   // Accent & CTAs
   primary: '#3B352E', // Deep warm brown (primary CTAs, floating tool icon)
-  primaryDark: '#2E2A24', // Darker variant
+  primaryDark: '#2A2520', // Darker variant
   primaryLight: '#F4F1EB', // Light warm text for dark backgrounds
-  accent: '#8A7F6D', // Muted clay (active role indicators, subtle highlights)
+  accent: '#7A6F60', // Muted warm clay (active role indicators, subtle highlights)
   
   // Borders
-  border: 'rgba(46, 42, 36, 0.08)', // Subtle warm border
-  borderMedium: 'rgba(46, 42, 36, 0.12)', // Slightly more visible
-  borderStrong: 'rgba(46, 42, 36, 0.16)', // Stronger separation
+  border: 'rgba(42, 37, 32, 0.12)', // Subtle warm border - more visible
+  borderMedium: 'rgba(42, 37, 32, 0.18)', // Medium separation
+  borderStrong: 'rgba(42, 37, 32, 0.24)', // Strong separation for cards
   
   // Status
-  success: '#8A9D7A', // Soft natural green
-  warning: '#8A7F6D', // Muted clay (calm warning)
-  error: '#B87A6F', // Soft terracotta
+  success: '#7A8F6D', // Soft natural green - grounded
+  warning: '#9A8468', // Warm clay (calm warning) - more visible
+  error: '#A86D60', // Soft terracotta - deeper
   
   // Active states
-  activeIndicator: '#8A7F6D', // Muted clay for active role/tab indicators
+  activeIndicator: '#6B5D4F', // Warm brown for active role/tab indicators - stronger
   
   // Overlay
-  overlay: 'rgba(216, 209, 195, 0.95)', // Warm linen overlay
+  overlay: 'rgba(197, 186, 171, 0.96)', // Warm stone overlay
 };
 
 export const spacing = {
