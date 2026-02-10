@@ -28,6 +28,15 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     requiresPro: true,
   },
   {
+    id: 'identity-separation-light',
+    title: 'Identity Separation (Light)',
+    purpose: 'Quick role boundary work',
+    duration: '3 min',
+    icon: 'psychology',
+    route: '/return/exercise-identity-light',
+    requiresPro: false,
+  },
+  {
     id: 'identity-separation',
     title: 'Identity Separation',
     purpose: 'Distinguish self from role',
