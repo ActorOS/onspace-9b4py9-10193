@@ -1,35 +1,37 @@
-// Actor OS - Light Taupe Color Scheme (from onboarding logo)
+// Actor OS - Warm Linen Design System
+// Calm, warm, legible, emotionally containing
 export const colors = {
   // Base backgrounds
-  background: '#a89d87', // Taupe (from logo background)
-  surface: '#9a8f77', // Darker taupe
-  surfaceElevated: '#b5a894', // Lighter taupe
+  background: '#D8D1C3', // Warm linen / sand tone (primary background)
+  surface: '#E6DFD2', // Lighter warm tone (cards, containers)
+  surfaceElevated: '#EAE4D9', // Slightly elevated surfaces
   
   // Text
-  textPrimary: '#3d3935', // Deep charcoal for primary text
-  textSecondary: '#5a544d', // Medium charcoal
-  textTertiary: '#7a7265', // Light charcoal
+  textPrimary: '#2E2A24', // Deep warm charcoal (headings, key prompts)
+  textSecondary: '#5A544A', // Supporting copy
+  textTertiary: '#7A7266', // Helper text
   
-  // Accent
-  primary: '#3d3935', // Deep charcoal for buttons/accents
-  primaryDark: '#2a2826', // Darker charcoal
-  accent: '#c4b59a', // Light warm taupe
+  // Accent & CTAs
+  primary: '#3B352E', // Deep warm brown (primary CTAs, floating tool icon)
+  primaryDark: '#2E2A24', // Darker variant
+  primaryLight: '#F4F1EB', // Light warm text for dark backgrounds
+  accent: '#8A7F6D', // Muted clay (active role indicators, subtle highlights)
   
   // Borders
-  border: '#8a806d',
-  borderLight: '#9a8f77',
+  border: 'rgba(46, 42, 36, 0.08)', // Subtle warm border
+  borderMedium: 'rgba(46, 42, 36, 0.12)', // Slightly more visible
+  borderStrong: 'rgba(46, 42, 36, 0.16)', // Stronger separation
   
   // Status
-  success: '#8a9d7a',
-  warning: '#3d3935', // High-contrast warm charcoal (was low-contrast yellow)
-  error: '#b87a6f',
+  success: '#8A9D7A', // Soft natural green
+  warning: '#8A7F6D', // Muted clay (calm warning)
+  error: '#B87A6F', // Soft terracotta
   
-  // Additional contrast colors for important messaging
-  cautionText: '#2a2826', // Extra dark for critical visibility
-  supportIcon: '#5a544d', // Medium charcoal for calm support indicators
+  // Active states
+  activeIndicator: '#8A7F6D', // Muted clay for active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(168, 157, 135, 0.95)',
+  overlay: 'rgba(216, 209, 195, 0.95)', // Warm linen overlay
 };
 
 export const spacing = {
@@ -83,9 +85,9 @@ export const typography = {
 };
 
 export const borderRadius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  sm: 6, // Slightly increased for softness
+  md: 10,
+  lg: 14,
+  xl: 18,
   round: 999,
 };
