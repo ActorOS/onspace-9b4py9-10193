@@ -108,7 +108,7 @@ export default function IdentitySeparationLightScreen() {
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.arrival);
       await waitForAudioEnd(arrivalSound);
       await arrivalSound.unloadAsync();
-      await wait(4000); // 4 second pause
+      await wait(5000); // 5 second pause
 
       // Step 2: Name Self
       setCurrentStep('nameSelf');
@@ -116,7 +116,7 @@ export default function IdentitySeparationLightScreen() {
       const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.nameSelf);
       await waitForAudioEnd(nameSelfSound);
       await nameSelfSound.unloadAsync();
-      await wait(5000); // 5 second hold
+      await wait(8000); // 8 second hold
 
       // Step 3: Separate
       setCurrentStep('separate');
@@ -124,7 +124,7 @@ export default function IdentitySeparationLightScreen() {
       const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.separate);
       await waitForAudioEnd(separateSound);
       await separateSound.unloadAsync();
-      await wait(12000); // 12 second hold
+      await wait(15000); // 15 second hold
 
       // Step 4: Close
       setCurrentStep('close');
@@ -217,7 +217,7 @@ export default function IdentitySeparationLightScreen() {
   };
 
   const getStepDescription = () => {
-    if (audioError) return 'Notice the boundary between self and role';
+    if (audioError) return 'Notice the boundary between your role and yourself. You are still here. You are present as you.'
     
     switch (currentStep) {
       case 'arrival':
