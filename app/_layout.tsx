@@ -105,6 +105,18 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="check-in/recommended-release-list" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="check-in/return-to-self-list" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="check-in/somatic-release-list" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="settings/default-exercise" 
           options={{ presentation: 'modal' }}
         />

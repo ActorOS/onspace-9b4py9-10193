@@ -30,43 +30,21 @@ export default function ReturnChoiceScreen() {
   };
 
   const handleRecommendedRelease = () => {
-    // Route based on workload intensity
-    if (!workloadLevel) {
-      // Default to breathing if no workload data
-      router.replace('/return/exercise-breathing');
-      return;
-    }
-
-    switch (workloadLevel) {
-      case 'light':
-        router.replace('/return/exercise-breathing');
-        break;
-      case 'medium':
-        router.replace('/return/exercise-bodyscan');
-        break;
-      case 'heavy':
-        router.replace('/return/exercise-identity');
-        break;
-      default:
-        router.replace('/return/exercise-breathing');
-    }
-  };
-
-  const handleReturnToSelf = () => {
-    // Route to breath settling (voice-led grounding)
+    // Navigate to recommended release exercise list
     router.replace({
-      pathname: '/somatic/play-track',
-      params: { 
-        trackId: 'breath_settling',
-        trackName: 'Breath Settling',
-        fromPostWork: 'true'
-      }
+      pathname: '/check-in/recommended-release-list',
+      params: { sessionId }
     });
   };
 
+  const handleReturnToSelf = () => {
+    // Navigate to return to self exercise list
+    router.replace('/check-in/return-to-self-list');
+  };
+
   const handleSomaticRelease = () => {
-    // Route to body scan (body-led release)
-    router.replace('/return/exercise-bodyscan');
+    // Navigate to somatic release exercise list
+    router.replace('/check-in/somatic-release-list');
   };
 
   const handleSkip = () => {
