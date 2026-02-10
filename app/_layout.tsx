@@ -61,6 +61,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="return/exercise-grounding" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="return/quick-name" 
           options={{ presentation: 'modal' }}
         />

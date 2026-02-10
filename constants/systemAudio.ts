@@ -83,6 +83,20 @@ export const systemVoiceAudio = {
     hold: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_05_hold.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/breath-settling/breath_06_close.mp3',
   },
+
+  /**
+   * Gentle Grounding Exercise
+   * 7-step time-governed sensory grounding using 5-4-3-2-1 framework
+   */
+  exerciseGrounding: {
+    arrive: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_01_arrive.mp3',
+    contact: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_02_contact.mp3',
+    see3: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_03_see.mp3',
+    hear2: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_04_hear.mp3',
+    feel1: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_05_feel.mp3',
+    widen: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_06_widen.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_07_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
