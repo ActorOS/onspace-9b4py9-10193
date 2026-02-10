@@ -1,37 +1,37 @@
-// Actor OS - Warm Stone Design System
-// Grounded, warm, legible, emotionally containing
+// Actor OS - Dark Neutral System
+// Containing, professional, steady - designed for nervous-system regulation
 export const colors = {
   // Base backgrounds
-  background: '#C5BAAB', // Warm stone / theatre wall (darker, grounded base)
-  surface: '#D9D0C3', // Lighter warm tone (cards, containers) - clear contrast
-  surfaceElevated: '#E2DAD0', // Elevated surfaces (modals, overlays)
+  background: '#2E2B27', // Deep warm stone / charcoal-beige (primary background)
+  surface: '#3F3A34', // Warm slate (cards, containers) - clear hierarchy
+  surfaceElevated: '#4A453F', // Elevated surfaces (modals, overlays)
   
   // Text
-  textPrimary: '#2A2520', // Deep warm charcoal (headings, key prompts) - stronger
-  textSecondary: '#524D44', // Supporting copy - improved contrast
-  textTertiary: '#6E6860', // Helper text - still readable
+  textPrimary: '#F2EEE8', // Warm off-white (headings, key prompts) - high clarity
+  textSecondary: '#CFC9C1', // Softened light grey-beige (supporting copy)
+  textTertiary: '#A9A39B', // Muted warm grey (helper text, icons)
   
   // Accent & CTAs
-  primary: '#3B352E', // Deep warm brown (primary CTAs, floating tool icon)
-  primaryDark: '#2A2520', // Darker variant
-  primaryLight: '#F4F1EB', // Light warm text for dark backgrounds
-  accent: '#7A6F60', // Muted warm clay (active role indicators, subtle highlights)
+  primary: '#B89968', // Muted clay / warm amber-brown (sparingly used)
+  primaryDark: '#9A7F52', // Darker amber variant
+  primaryLight: '#D4B88A', // Lighter amber for emphasis
+  accent: '#8E9B7A', // Desaturated sage (status indicators, active states)
   
   // Borders
-  border: 'rgba(42, 37, 32, 0.12)', // Subtle warm border - more visible
-  borderMedium: 'rgba(42, 37, 32, 0.18)', // Medium separation
-  borderStrong: 'rgba(42, 37, 32, 0.24)', // Strong separation for cards
+  border: 'rgba(169, 163, 155, 0.15)', // Very subtle, low-contrast dividers
+  borderMedium: 'rgba(169, 163, 155, 0.25)', // Medium separation
+  borderStrong: 'rgba(169, 163, 155, 0.35)', // Strong separation for cards
   
   // Status
-  success: '#7A8F6D', // Soft natural green - grounded
-  warning: '#9A8468', // Warm clay (calm warning) - more visible
-  error: '#A86D60', // Soft terracotta - deeper
+  success: '#7D8F73', // Muted olive-sage (OPEN, ACTIVE states)
+  warning: '#B89968', // Muted clay (calm warning)
+  error: '#B8826D', // Soft terracotta (errors, alerts)
   
   // Active states
-  activeIndicator: '#6B5D4F', // Warm brown for active role/tab indicators - stronger
+  activeIndicator: '#B89968', // Warm amber for active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(197, 186, 171, 0.96)', // Warm stone overlay
+  overlay: 'rgba(46, 43, 39, 0.96)', // Dark warm overlay
 };
 
 export const spacing = {
