@@ -24,7 +24,7 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     purpose: 'Voice-led grounding practice',
     duration: '2 min',
     icon: 'air',
-    route: '/somatic/play-track?trackId=breath_settling&trackName=Breath Settling&fromPostWork=true',
+    route: '/somatic/play-track?trackType=breath_settling&fromPostWork=true',
     requiresPro: true,
   },
   {
