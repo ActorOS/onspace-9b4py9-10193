@@ -92,8 +92,11 @@ export default function PostCheckInScreen() {
         Alert.alert('Held', 'This has been recorded in your role container');
         router.replace('/(tabs)');
       } else {
-        // Navigate directly to Return to Self / grounding exercises
-        router.replace('/grounding');
+        // Navigate to post-work release recommendation screen
+        router.replace({
+          pathname: '/check-in/post-work-release',
+          params: { sessionId },
+        });
       }
     } catch (error) {
       console.error('Failed to save aftereffect:', error);

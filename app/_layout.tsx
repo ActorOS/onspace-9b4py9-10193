@@ -97,6 +97,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="check-in/post-work-release" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="settings/default-exercise" 
           options={{ presentation: 'modal' }}
         />
