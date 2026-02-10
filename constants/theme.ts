@@ -3,13 +3,13 @@
 export const colors = {
   // Base backgrounds
   background: '#2E2B27', // Deep warm stone / charcoal-beige (primary background)
-  surface: '#3F3A34', // Warm slate (cards, containers) - clear hierarchy
-  surfaceElevated: '#4A453F', // Elevated surfaces (modals, overlays)
+  surface: '#4D4741', // Warm slate (cards, containers) - stronger hierarchy (+12% contrast)
+  surfaceElevated: '#58524C', // Elevated surfaces (modals, overlays)
   
   // Text
-  textPrimary: '#F2EEE8', // Warm off-white (headings, key prompts) - high clarity
-  textSecondary: '#CFC9C1', // Softened light grey-beige (supporting copy)
-  textTertiary: '#A9A39B', // Muted warm grey (helper text, icons)
+  textPrimary: '#F5F2ED', // Bright warm off-white (headings, key prompts) - enhanced clarity
+  textSecondary: '#DCD6CE', // Light warm beige (supporting copy) - improved readability
+  textTertiary: '#B5AFA7', // Softened warm grey (helper text, icons) - clearer without harshness
   
   // Accent & CTAs
   primary: '#B89968', // Muted clay / warm amber-brown (sparingly used)
