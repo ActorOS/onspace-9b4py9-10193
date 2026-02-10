@@ -9,11 +9,11 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 
-// Light Load Identity Separation - 4-step condensed version
+// Light Load Identity Separation - 5-step condensed version
 // Quick, efficient separation for light workload sessions
 // Fully hands-free once started
 
-type LightIdentityStep = 'arrival' | 'nameSelf' | 'separate' | 'close' | 'complete';
+type LightIdentityStep = 'arrival' | 'nameSelf' | 'boundary' | 'release' | 'close' | 'complete';
 
 export default function IdentitySeparationLightScreen() {
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function IdentitySeparationLightScreen() {
       const arrivalSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.arrival);
       await waitForAudioEnd(arrivalSound);
       await arrivalSound.unloadAsync();
-      await wait(5000); // 5 second pause
+      await wait(4000); // 4 second pause
 
       // Step 2: Name Self
       setCurrentStep('nameSelf');
@@ -116,17 +116,25 @@ export default function IdentitySeparationLightScreen() {
       const nameSelfSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.nameSelf);
       await waitForAudioEnd(nameSelfSound);
       await nameSelfSound.unloadAsync();
-      await wait(8000); // 8 second hold
+      await wait(6000); // 6 second hold
 
-      // Step 3: Separate
-      setCurrentStep('separate');
+      // Step 3: Boundary
+      setCurrentStep('boundary');
       startWaveAnimation();
-      const separateSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.separate);
-      await waitForAudioEnd(separateSound);
-      await separateSound.unloadAsync();
-      await wait(15000); // 15 second hold
+      const boundarySound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.boundary);
+      await waitForAudioEnd(boundarySound);
+      await boundarySound.unloadAsync();
+      await wait(10000); // 10 second hold
 
-      // Step 4: Close
+      // Step 4: Release
+      setCurrentStep('release');
+      startWaveAnimation();
+      const releaseSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.release);
+      await waitForAudioEnd(releaseSound);
+      await releaseSound.unloadAsync();
+      await wait(12000); // 12 second hold
+
+      // Step 5: Close
       setCurrentStep('close');
       startWaveAnimation();
       const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityLight.close);
@@ -205,8 +213,10 @@ export default function IdentitySeparationLightScreen() {
         return 'Arriving';
       case 'nameSelf':
         return 'Your Name';
-      case 'separate':
-        return 'Separation';
+      case 'boundary':
+        return 'Locating Boundary';
+      case 'release':
+        return 'Release';
       case 'close':
         return 'Closing';
       case 'complete':
@@ -224,8 +234,10 @@ export default function IdentitySeparationLightScreen() {
         return 'Taking your position';
       case 'nameSelf':
         return 'Who you are';
-      case 'separate':
-        return 'Making the distinction';
+      case 'boundary':
+        return 'Where role ends, you begin';
+      case 'release':
+        return 'Letting go of what is not yours';
       case 'close':
         return 'The work is done';
       default:
@@ -239,7 +251,9 @@ export default function IdentitySeparationLightScreen() {
         return 'self-improvement';
       case 'nameSelf':
         return 'psychology';
-      case 'separate':
+      case 'boundary':
+        return 'border-clear';
+      case 'release':
         return 'grain';
       case 'close':
         return 'check-circle';
