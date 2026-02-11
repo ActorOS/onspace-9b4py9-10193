@@ -2,14 +2,14 @@
 // Grounded rehearsal notebook aesthetic - natural, calm, paper-like
 export const colors = {
   // Base backgrounds
-  background: '#F2E9DC', // Warm oat parchment (calm, natural, paper-like foundation)
+  background: '#DDD2C4', // Warm parchment background (calm, grounded, cinematic foundation)
   surface: '#DDD0BE', // Cards and containers (darker sand tone - clear separation)
   surfaceElevated: '#E8DFD0', // Section backgrounds (subtle structure)
   
   // Text
-  textPrimary: '#2D2116', // Primary text (deep espresso brown for headings)
-  textSecondary: '#5A4E42', // Secondary text (warm charcoal for body text, labels, metadata)
-  textTertiary: '#5A4E42', // Tertiary text (same as secondary)
+  textPrimary: '#3A2F2A', // Primary text (deep espresso brown for titles - increased contrast)
+  textSecondary: '#5C5046', // Secondary text (soft brown for body text, labels, metadata)
+  textTertiary: '#5C5046', // Tertiary text (same as secondary)
   
   // Accent & CTAs (use sparingly)
   primary: '#7A4A2E', // Accent - CTAs, progress indicators, selected states only
