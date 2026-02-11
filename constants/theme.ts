@@ -1,37 +1,37 @@
-// Actor OS - Warm Beige System
-// Calm, material, backstage - designed for visual restraint and containment
+// Actor OS - Warm Coffee-Brown System
+// Grounded, theatrical, intentional - designed for warmth and restraint
 export const colors = {
   // Base backgrounds
-  background: '#EFE9DD', // Warm beige (global foundation)
-  surface: '#D6CFC0', // Cards and containers (grounded)
-  surfaceElevated: '#E4DDCF', // Section backgrounds (subtle hierarchy)
+  background: '#F5F2ED', // Warm paper white (global foundation)
+  surface: '#C8B6A6', // Cards and containers (grounded visual weight)
+  surfaceElevated: '#E9E2D8', // Section backgrounds (subtle structure)
   
   // Text
-  textPrimary: '#2A2926', // Primary text (headings, key prompts)
-  textSecondary: '#6E6A63', // Secondary text (labels, metadata, helper text)
-  textTertiary: '#6E6A63', // Tertiary text (same as secondary)
+  textPrimary: '#2E241C', // Primary text (deep coffee brown)
+  textSecondary: '#6F6257', // Secondary text (labels, durations, metadata, helper text)
+  textTertiary: '#6F6257', // Tertiary text (same as secondary)
   
   // Accent & CTAs (use sparingly)
-  primary: '#8A6F4E', // Accent - CTAs, progress indicators, selected states only
-  primaryDark: '#8A6F4E', // No auto-derived shades
-  primaryLight: '#8A6F4E', // No auto-derived shades
-  accent: '#8A6F4E', // Accent for status indicators, active states
+  primary: '#7A4A2E', // Accent - CTAs, progress indicators, selected states only
+  primaryDark: '#7A4A2E', // No auto-derived shades
+  primaryLight: '#7A4A2E', // No auto-derived shades
+  accent: '#7A4A2E', // Accent for status indicators, active states
   
   // Borders
-  border: '#C7C0B3', // Divider lines and disabled elements
-  borderMedium: '#C7C0B3', // Medium separation
-  borderStrong: '#C7C0B3', // Strong separation for cards
+  border: '#D6CDC3', // Divider lines, borders, and disabled elements
+  borderMedium: '#D6CDC3', // Medium separation
+  borderStrong: '#D6CDC3', // Strong separation for cards
   
   // Status
-  success: '#8A6F4E', // Use accent color for success states
-  warning: '#8A6F4E', // Use accent color for warnings
-  error: '#8A6F4E', // Use accent color for errors (restrained)
+  success: '#7A4A2E', // Use accent color for success states
+  warning: '#7A4A2E', // Use accent color for warnings
+  error: '#7A4A2E', // Use accent color for errors (restrained)
   
   // Active states
-  activeIndicator: '#8A6F4E', // Active role/tab indicators
+  activeIndicator: '#7A4A2E', // Active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(239, 233, 221, 0.96)', // Warm beige overlay
+  overlay: 'rgba(245, 242, 237, 0.96)', // Warm paper white overlay
 };
 
 export const spacing = {
