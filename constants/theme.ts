@@ -1,37 +1,37 @@
-// Actor OS - Dark Neutral System
-// Containing, professional, steady - designed for nervous-system regulation
+// Actor OS - Ritual-Led System
+// Grounded, calm, adult, backstage - designed for containment and presence
 export const colors = {
   // Base backgrounds
-  background: '#2E2B27', // Deep warm stone / charcoal-beige (primary background)
-  surface: '#4D4741', // Warm slate (cards, containers) - stronger hierarchy (+12% contrast)
-  surfaceElevated: '#58524C', // Elevated surfaces (modals, overlays)
+  background: '#1F1E1B', // Warm charcoal (global foundation)
+  surface: '#2B2925', // Primary cards and containers
+  surfaceElevated: '#35322D', // Secondary surfaces (use only where hierarchy needed)
   
   // Text
-  textPrimary: '#F5F2ED', // Bright warm off-white (headings, key prompts) - enhanced clarity
-  textSecondary: '#DCD6CE', // Light warm beige (supporting copy) - improved readability
-  textTertiary: '#B5AFA7', // Softened warm grey (helper text, icons) - clearer without harshness
+  textPrimary: '#ECE9E2', // Primary text (headings, key prompts)
+  textSecondary: '#B7B2A6', // Secondary text (labels, metadata, helper text)
+  textTertiary: '#B7B2A6', // Tertiary text (same as secondary)
   
-  // Accent & CTAs
-  primary: '#B89968', // Muted clay / warm amber-brown (sparingly used)
-  primaryDark: '#9A7F52', // Darker amber variant
-  primaryLight: '#D4B88A', // Lighter amber for emphasis
-  accent: '#8E9B7A', // Desaturated sage (status indicators, active states)
+  // Accent & CTAs (use sparingly)
+  primary: '#8C7A4F', // Accent - CTAs, progress indicators, active states only
+  primaryDark: '#8C7A4F', // No auto-derived shades
+  primaryLight: '#8C7A4F', // No auto-derived shades
+  accent: '#8C7A4F', // Accent for status indicators, active states
   
   // Borders
-  border: 'rgba(169, 163, 155, 0.15)', // Very subtle, low-contrast dividers
-  borderMedium: 'rgba(169, 163, 155, 0.25)', // Medium separation
-  borderStrong: 'rgba(169, 163, 155, 0.35)', // Strong separation for cards
+  border: 'rgba(183, 178, 166, 0.12)', // Very subtle dividers
+  borderMedium: 'rgba(183, 178, 166, 0.20)', // Medium separation
+  borderStrong: 'rgba(183, 178, 166, 0.28)', // Strong separation for cards
   
   // Status
-  success: '#7D8F73', // Muted olive-sage (OPEN, ACTIVE states)
-  warning: '#B89968', // Muted clay (calm warning)
-  error: '#B8826D', // Soft terracotta (errors, alerts)
+  success: '#8C7A4F', // Use accent color for success states
+  warning: '#8C7A4F', // Use accent color for warnings
+  error: '#8C7A4F', // Use accent color for errors (restrained)
   
   // Active states
-  activeIndicator: '#B89968', // Warm amber for active role/tab indicators
+  activeIndicator: '#8C7A4F', // Active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(46, 43, 39, 0.96)', // Dark warm overlay
+  overlay: 'rgba(31, 30, 27, 0.96)', // Dark warm overlay
 };
 
 export const spacing = {
