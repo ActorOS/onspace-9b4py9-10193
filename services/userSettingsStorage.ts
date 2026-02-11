@@ -18,6 +18,7 @@ export interface UserSettings {
   voiceSpeed: number; // 0.9–1.1
   voiceVolume: number; // 0–100
   dataExportFormat: DataExportFormat;
+  showAuditionMetrics: boolean; // Show/hide numerical metrics in Audition Aftermath
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   voiceSpeed: 1.0,
   voiceVolume: 75,
   dataExportFormat: 'json',
+  showAuditionMetrics: true, // Default: metrics visible
 };
 
 class UserSettingsStorage {

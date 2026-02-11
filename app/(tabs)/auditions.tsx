@@ -1,16 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Switch, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { auditionStorage, type Audition } from '@/services/auditionStorage';
+import { userSettingsStorage } from '@/services/userSettingsStorage';
 
 export default function AuditionsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [auditions, setAuditions] = useState<Audition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showMetrics, setShowMetrics] = useState(true);
+  const [fadeAnim] = useState(new Animated.Value(1));
 
   const loadAuditions = async () => {
     setIsLoading(true);
@@ -21,11 +24,35 @@ export default function AuditionsScreen() {
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
       setAuditions(sorted);
+      
+      // Load metrics visibility preference
+      const settings = await userSettingsStorage.getSettings();
+      setShowMetrics(settings.showAuditionMetrics);
     } catch (error) {
       console.error('Failed to load auditions:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleToggleMetrics = async (value: boolean) => {
+    // Fade out
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(async () => {
+      // Update state and storage
+      setShowMetrics(value);
+      await userSettingsStorage.updateSetting('showAuditionMetrics', value);
+      
+      // Fade in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   useFocusEffect(
@@ -62,20 +89,42 @@ export default function AuditionsScreen() {
 
         {/* Stats Card */}
         <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{totalAuditions}</Text>
-            <Text style={styles.statLabel}>Auditions</Text>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Show Metrics</Text>
+            <Switch
+              value={showMetrics}
+              onValueChange={handleToggleMetrics}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={colors.surface}
+              ios_backgroundColor={colors.border}
+            />
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{callbacksCount}</Text>
-            <Text style={styles.statLabel}>Callbacks</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{castCount}</Text>
-            <Text style={styles.statLabel}>Cast</Text>
-          </View>
+          
+          <Animated.View style={[styles.statsContent, { opacity: fadeAnim }]}>
+            {showMetrics ? (
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{totalAuditions}</Text>
+                  <Text style={styles.statLabel}>Auditions</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{callbacksCount}</Text>
+                  <Text style={styles.statLabel}>Callbacks</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{castCount}</Text>
+                  <Text style={styles.statLabel}>Cast</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.hiddenMetricsContainer}>
+                <Text style={styles.hiddenMetricsText}>Metrics Hidden</Text>
+                <Text style={styles.hiddenMetricsSubtext}>Your work is more than numbers.</Text>
+              </View>
+            )}
+          </Animated.View>
         </View>
 
         {/* Add Button */}
@@ -210,11 +259,33 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: spacing.md,
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  toggleLabel: {
+    fontSize: typography.sizes.sm,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.regular,
+    color: colors.textSecondary,
+    marginRight: spacing.sm,
+  },
+  statsContent: {
+    minHeight: 60,
+    justifyContent: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   statItem: {
     alignItems: 'center',
@@ -234,6 +305,23 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     backgroundColor: colors.border,
+  },
+  hiddenMetricsContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  hiddenMetricsText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.semibold,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  hiddenMetricsSubtext: {
+    fontSize: typography.sizes.sm,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.regular,
+    color: colors.textTertiary,
   },
   section: {
     paddingHorizontal: spacing.lg,
