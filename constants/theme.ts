@@ -1,37 +1,37 @@
-// Actor OS - Ritual-Led System
-// Grounded, calm, adult, backstage - designed for containment and presence
+// Actor OS - Warm Beige System
+// Calm, material, backstage - designed for visual restraint and containment
 export const colors = {
   // Base backgrounds
-  background: '#1F1E1B', // Warm charcoal (global foundation)
-  surface: '#2B2925', // Primary cards and containers
-  surfaceElevated: '#35322D', // Secondary surfaces (use only where hierarchy needed)
+  background: '#EFE9DD', // Warm beige (global foundation)
+  surface: '#D6CFC0', // Cards and containers (grounded)
+  surfaceElevated: '#E4DDCF', // Section backgrounds (subtle hierarchy)
   
   // Text
-  textPrimary: '#ECE9E2', // Primary text (headings, key prompts)
-  textSecondary: '#B7B2A6', // Secondary text (labels, metadata, helper text)
-  textTertiary: '#B7B2A6', // Tertiary text (same as secondary)
+  textPrimary: '#2A2926', // Primary text (headings, key prompts)
+  textSecondary: '#6E6A63', // Secondary text (labels, metadata, helper text)
+  textTertiary: '#6E6A63', // Tertiary text (same as secondary)
   
   // Accent & CTAs (use sparingly)
-  primary: '#8C7A4F', // Accent - CTAs, progress indicators, active states only
-  primaryDark: '#8C7A4F', // No auto-derived shades
-  primaryLight: '#8C7A4F', // No auto-derived shades
-  accent: '#8C7A4F', // Accent for status indicators, active states
+  primary: '#8A6F4E', // Accent - CTAs, progress indicators, selected states only
+  primaryDark: '#8A6F4E', // No auto-derived shades
+  primaryLight: '#8A6F4E', // No auto-derived shades
+  accent: '#8A6F4E', // Accent for status indicators, active states
   
   // Borders
-  border: 'rgba(183, 178, 166, 0.12)', // Very subtle dividers
-  borderMedium: 'rgba(183, 178, 166, 0.20)', // Medium separation
-  borderStrong: 'rgba(183, 178, 166, 0.28)', // Strong separation for cards
+  border: '#C7C0B3', // Divider lines and disabled elements
+  borderMedium: '#C7C0B3', // Medium separation
+  borderStrong: '#C7C0B3', // Strong separation for cards
   
   // Status
-  success: '#8C7A4F', // Use accent color for success states
-  warning: '#8C7A4F', // Use accent color for warnings
-  error: '#8C7A4F', // Use accent color for errors (restrained)
+  success: '#8A6F4E', // Use accent color for success states
+  warning: '#8A6F4E', // Use accent color for warnings
+  error: '#8A6F4E', // Use accent color for errors (restrained)
   
   // Active states
-  activeIndicator: '#8C7A4F', // Active role/tab indicators
+  activeIndicator: '#8A6F4E', // Active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(31, 30, 27, 0.96)', // Dark warm overlay
+  overlay: 'rgba(239, 233, 221, 0.96)', // Warm beige overlay
 };
 
 export const spacing = {
