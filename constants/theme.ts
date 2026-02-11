@@ -2,7 +2,7 @@
 // Grounded, theatrical, intentional - designed for warmth and restraint
 export const colors = {
   // Base backgrounds
-  background: '#FAF7F2', // Very pale warm beige (soft foundation - lighter than cards)
+  background: '#B8956A', // Warm brown (studio foundation)
   surface: '#C8B6A6', // Cards and containers (grounded visual weight)
   surfaceElevated: '#E9E2D8', // Section backgrounds (subtle structure)
   
