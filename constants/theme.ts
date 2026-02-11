@@ -1,15 +1,15 @@
-// Actor OS - Warm Coffee-Brown System
-// Grounded, theatrical, intentional - designed for warmth and restraint
+// Actor OS - Warm Oat & Parchment System
+// Grounded rehearsal notebook aesthetic - natural, calm, paper-like
 export const colors = {
   // Base backgrounds
-  background: '#FFDDD2', // Soft salmon (calm foundation - lighter than cards)
-  surface: '#C8B6A6', // Cards and containers (grounded visual weight)
-  surfaceElevated: '#E9E2D8', // Section backgrounds (subtle structure)
+  background: '#F2E9DC', // Warm oat parchment (calm, natural, paper-like foundation)
+  surface: '#DDD0BE', // Cards and containers (darker sand tone - clear separation)
+  surfaceElevated: '#E8DFD0', // Section backgrounds (subtle structure)
   
   // Text
-  textPrimary: '#2E241C', // Primary text (deep coffee brown)
-  textSecondary: '#6F6257', // Secondary text (labels, durations, metadata, helper text)
-  textTertiary: '#6F6257', // Tertiary text (same as secondary)
+  textPrimary: '#2D2116', // Primary text (deep espresso brown for headings)
+  textSecondary: '#5A4E42', // Secondary text (warm charcoal for body text, labels, metadata)
+  textTertiary: '#5A4E42', // Tertiary text (same as secondary)
   
   // Accent & CTAs (use sparingly)
   primary: '#7A4A2E', // Accent - CTAs, progress indicators, selected states only
@@ -18,9 +18,9 @@ export const colors = {
   accent: '#7A4A2E', // Accent for status indicators, active states
   
   // Borders
-  border: '#D6CDC3', // Divider lines, borders, and disabled elements
-  borderMedium: '#D6CDC3', // Medium separation
-  borderStrong: '#D6CDC3', // Strong separation for cards
+  border: '#CFC4B3', // Divider lines, borders, and disabled elements (subtle)
+  borderMedium: '#CFC4B3', // Medium separation
+  borderStrong: '#CFC4B3', // Strong separation for cards
   
   // Status
   success: '#7A4A2E', // Use accent color for success states
@@ -31,7 +31,7 @@ export const colors = {
   activeIndicator: '#7A4A2E', // Active role/tab indicators
   
   // Overlay
-  overlay: 'rgba(245, 242, 237, 0.96)', // Warm paper white overlay
+  overlay: 'rgba(242, 233, 220, 0.96)', // Warm oat overlay
 };
 
 export const spacing = {
