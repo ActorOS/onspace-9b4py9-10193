@@ -429,17 +429,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   roleCard: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: '#7A4A2E',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 1,
   },
   roleCardHeader: {
     flexDirection: 'row',
