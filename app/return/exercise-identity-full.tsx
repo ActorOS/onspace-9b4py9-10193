@@ -9,8 +9,8 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 
-// Identity Separation Full Release - 12-step comprehensive version
-// Deep separation process for medium/heavy workload sessions
+// Identity Separation Full Release - 16-step comprehensive version
+// Deep separation process for medium/heavy workload sessions - ~12 minutes
 // Fully hands-free once started
 
 type IdentityFullStep = 
@@ -21,10 +21,14 @@ type IdentityFullStep =
   | 'boundary' 
   | 'releaseEffort' 
   | 'discharge' 
+  | 'allowShake' 
+  | 'breathResettle' 
   | 'returnBreath' 
   | 'reclaimName' 
   | 'reclaimPosture' 
   | 'reclaimSpace' 
+  | 'boundaryReclaim' 
+  | 'reintegration' 
   | 'close' 
   | 'complete';
 
@@ -47,7 +51,7 @@ export default function IdentitySeparationFullScreen() {
           createdAt: new Date().toISOString(),
           roleId,
           exerciseType: 'identity_separation_full',
-          durationMinutes: 8,
+          durationMinutes: 12,
           completed: false,
         });
         setSessionId(session.id);
@@ -169,9 +173,25 @@ export default function IdentitySeparationFullScreen() {
       const dischargeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.discharge);
       await waitForAudioEnd(dischargeSound);
       await dischargeSound.unloadAsync();
+      await wait(12000);
+
+      // Step 8: Allow Shake/Tremor
+      setCurrentStep('allowShake');
+      startWaveAnimation();
+      const allowShakeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.allowShake);
+      await waitForAudioEnd(allowShakeSound);
+      await allowShakeSound.unloadAsync();
+      await wait(20000);
+
+      // Step 9: Breath Resettle
+      setCurrentStep('breathResettle');
+      startWaveAnimation();
+      const breathResettleSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.breathResettle);
+      await waitForAudioEnd(breathResettleSound);
+      await breathResettleSound.unloadAsync();
       await wait(15000);
 
-      // Step 8: Return Breath
+      // Step 10: Return Breath
       setCurrentStep('returnBreath');
       startWaveAnimation();
       const returnBreathSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.returnBreath);
@@ -179,31 +199,47 @@ export default function IdentitySeparationFullScreen() {
       await returnBreathSound.unloadAsync();
       await wait(12000);
 
-      // Step 9: Reclaim Name
+      // Step 11: Reclaim Name
       setCurrentStep('reclaimName');
       startWaveAnimation();
       const reclaimNameSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.reclaimName);
       await waitForAudioEnd(reclaimNameSound);
       await reclaimNameSound.unloadAsync();
-      await wait(8000);
+      await wait(10000);
 
-      // Step 10: Reclaim Posture
+      // Step 12: Reclaim Posture
       setCurrentStep('reclaimPosture');
       startWaveAnimation();
       const reclaimPostureSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.reclaimPosture);
       await waitForAudioEnd(reclaimPostureSound);
       await reclaimPostureSound.unloadAsync();
-      await wait(8000);
+      await wait(10000);
 
-      // Step 11: Reclaim Space
+      // Step 13: Reclaim Space
       setCurrentStep('reclaimSpace');
       startWaveAnimation();
       const reclaimSpaceSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.reclaimSpace);
       await waitForAudioEnd(reclaimSpaceSound);
       await reclaimSpaceSound.unloadAsync();
-      await wait(10000);
+      await wait(12000);
 
-      // Step 12: Close
+      // Step 14: Boundary Reclaim
+      setCurrentStep('boundaryReclaim');
+      startWaveAnimation();
+      const boundaryReclaimSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.boundaryReclaim);
+      await waitForAudioEnd(boundaryReclaimSound);
+      await boundaryReclaimSound.unloadAsync();
+      await wait(12000);
+
+      // Step 15: Reintegration
+      setCurrentStep('reintegration');
+      startWaveAnimation();
+      const reintegrationSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.reintegration);
+      await waitForAudioEnd(reintegrationSound);
+      await reintegrationSound.unloadAsync();
+      await wait(15000);
+
+      // Step 16: Close
       setCurrentStep('close');
       startWaveAnimation();
       const closeSound = await playAudioStep(systemVoiceAudio.exerciseIdentityFull.close);
@@ -292,6 +328,10 @@ export default function IdentitySeparationFullScreen() {
         return 'Release Effort';
       case 'discharge':
         return 'Discharge';
+      case 'allowShake':
+        return 'Allow Tremor';
+      case 'breathResettle':
+        return 'Breath Resettle';
       case 'returnBreath':
         return 'Return to Breath';
       case 'reclaimName':
@@ -300,6 +340,10 @@ export default function IdentitySeparationFullScreen() {
         return 'Reclaim Your Posture';
       case 'reclaimSpace':
         return 'Reclaim Your Space';
+      case 'boundaryReclaim':
+        return 'Reclaim Boundary';
+      case 'reintegration':
+        return 'Reintegration';
       case 'close':
         return 'Closing';
       case 'complete':
@@ -329,6 +373,10 @@ export default function IdentitySeparationFullScreen() {
         return 'Let go of holding';
       case 'discharge':
         return 'Allow what needs to leave';
+      case 'allowShake':
+        return 'Shake, tremble, or discharge as needed';
+      case 'breathResettle':
+        return 'Let your breath find its natural rhythm';
       case 'returnBreath':
         return 'Come back to your own rhythm';
       case 'reclaimName':
@@ -337,6 +385,10 @@ export default function IdentitySeparationFullScreen() {
         return 'Your body is yours';
       case 'reclaimSpace':
         return 'You occupy your own presence';
+      case 'boundaryReclaim':
+        return 'Reclaim what is yours, release what is not';
+      case 'reintegration':
+        return 'Whole and complete in yourself';
       case 'close':
         return 'The work is done';
       default:
@@ -357,9 +409,15 @@ export default function IdentitySeparationFullScreen() {
         return 'border-clear';
       case 'releaseEffort':
       case 'discharge':
+      case 'allowShake':
         return 'trending-down';
+      case 'breathResettle':
       case 'returnBreath':
         return 'air';
+      case 'boundaryReclaim':
+        return 'border-clear';
+      case 'reintegration':
+        return 'check-circle';
       case 'reclaimName':
       case 'reclaimPosture':
       case 'reclaimSpace':
@@ -389,11 +447,11 @@ export default function IdentitySeparationFullScreen() {
               <Text style={styles.welcomeTitle}>Identity Separation</Text>
               <Text style={styles.subtitleText}>Full Release Version</Text>
               <Text style={styles.welcomeText}>
-                An 8-minute guided process for complete separation after demanding work.
+                A 12-minute guided process for complete separation after demanding work.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}
-                Notice, locate, name, release, discharge, and reclaim.
+                Notice, locate, name, release, discharge, resettle, and reclaim.
               </Text>
             </>
           ) : (

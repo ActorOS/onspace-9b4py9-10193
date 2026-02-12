@@ -99,8 +99,8 @@ export const systemVoiceAudio = {
   },
 
   /**
-   * Identity Separation Full Release (12-step comprehensive version)
-   * Deep separation process for medium/heavy workload sessions
+   * Identity Separation Full Release (16-step comprehensive version)
+   * Deep separation process for medium/heavy workload sessions - ~12 minutes
    */
   exerciseIdentityFull: {
     arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_01_arrival.mp3',
@@ -110,11 +110,15 @@ export const systemVoiceAudio = {
     boundary: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_05_boundary.mp3',
     releaseEffort: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_06_release_effort.mp3',
     discharge: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_07_discharge.mp3',
-    returnBreath: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_08_return_breath.mp3',
-    reclaimName: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_09_reclaim_name.mp3',
-    reclaimPosture: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_10_reclaim_posture.mp3',
-    reclaimSpace: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_11_reclaim_space.mp3',
-    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_12_close.mp3',
+    allowShake: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_08_allow_shake.mp3',
+    breathResettle: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_09_breath_resettle.mp3',
+    returnBreath: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_10_return_breath.mp3',
+    reclaimName: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_11_reclaim_name.mp3',
+    reclaimPosture: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_12_reclaim_posture.mp3',
+    reclaimSpace: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_13_reclaim_space.mp3',
+    boundaryReclaim: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_14_boundary_reclaim.mp3',
+    reintegration: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_15_reintegration.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_16_close.mp3',
   },
 } as const;
 
