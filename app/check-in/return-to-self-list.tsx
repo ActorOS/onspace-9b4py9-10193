@@ -46,6 +46,15 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     requiresPro: true,
   },
   {
+    id: 'identity-separation-full',
+    title: 'Identity Separation — Full Release',
+    purpose: 'Deep return after immersive work',
+    duration: '8 min',
+    icon: 'psychology',
+    route: '/return/exercise-identity-full',
+    requiresPro: true,
+  },
+  {
     id: 'quick-name',
     title: 'Name Yourself',
     purpose: 'Ground in your own identity',
