@@ -114,19 +114,59 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
+              onPress={() => router.push('/return/exercise-identity-light')}
+            >
+              <View style={styles.exerciseIcon}>
+                <MaterialIcons name="psychology" size={28} color={colors.primary} />
+              </View>
+              <View style={styles.exerciseContent}>
+                <Text style={styles.exerciseTitle}>Identity Separation (Light)</Text>
+                <Text style={styles.exerciseDescription}>
+                  Quick separation from role
+                </Text>
+                <View style={styles.exerciseMeta}>
+                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
+                  <Text style={styles.exerciseTime}>8 min</Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </Pressable>
+
+            <Pressable 
+              style={styles.exerciseCard}
               onPress={() => router.push('/return/exercise-identity')}
             >
               <View style={styles.exerciseIcon}>
-                <MaterialIcons name="psychology" size={28} color={colors.textPrimary} />
+                <MaterialIcons name="psychology" size={28} color={colors.accent} />
               </View>
               <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseTitle}>Identity Separation</Text>
+                <Text style={styles.exerciseTitle}>Identity Separation (Standard)</Text>
                 <Text style={styles.exerciseDescription}>
                   Guided prompts to distinguish self from character
                 </Text>
                 <View style={styles.exerciseMeta}>
                   <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>8 min</Text>
+                  <Text style={styles.exerciseTime}>10 min</Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </Pressable>
+
+            <Pressable 
+              style={styles.exerciseCard}
+              onPress={() => router.push('/return/exercise-identity-full')}
+            >
+              <View style={styles.exerciseIcon}>
+                <MaterialIcons name="psychology" size={28} color={colors.textPrimary} />
+              </View>
+              <View style={styles.exerciseContent}>
+                <Text style={styles.exerciseTitle}>Identity Separation (Full)</Text>
+                <Text style={styles.exerciseDescription}>
+                  Deep separation + full return to self
+                </Text>
+                <View style={styles.exerciseMeta}>
+                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
+                  <Text style={styles.exerciseTime}>12 min</Text>
                 </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
