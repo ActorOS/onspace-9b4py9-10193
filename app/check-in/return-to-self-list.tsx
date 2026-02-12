@@ -22,9 +22,9 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'identity-separation',
     title: 'Identity Separation',
     purpose: 'Choose depth of separation',
-    duration: '3-10 min',
+    duration: '8-12 min',
     icon: 'psychology',
-    route: '/return/identity-separation-choose',
+    route: '/return/identity-separation-tiers',
     requiresPro: false,
   },
   {
