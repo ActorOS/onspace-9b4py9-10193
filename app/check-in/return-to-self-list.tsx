@@ -19,6 +19,15 @@ type ExerciseOption = {
 
 const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
   {
+    id: 'identity-separation',
+    title: 'Identity Separation',
+    purpose: 'Choose depth of separation',
+    duration: '3-10 min',
+    icon: 'psychology',
+    route: '/return/identity-separation-choose',
+    requiresPro: false,
+  },
+  {
     id: 'breath-settling',
     title: 'Breath Settling',
     purpose: 'Voice-led grounding practice',
@@ -56,42 +65,13 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
   },
 ];
 
-const IDENTITY_SEPARATION_VARIANTS: ExerciseOption[] = [
-  {
-    id: 'identity-separation-light',
-    title: 'Identity Separation — Light',
-    purpose: 'Gentle distinction from role',
-    duration: '3 min',
-    icon: 'psychology',
-    route: '/return/exercise-identity-light',
-    requiresPro: false,
-  },
-  {
-    id: 'identity-separation',
-    title: 'Identity Separation — Standard',
-    purpose: 'Structured return to self',
-    duration: '10 min',
-    icon: 'psychology',
-    route: '/return/exercise-identity',
-    requiresPro: true,
-  },
-  {
-    id: 'identity-separation-full',
-    title: 'Identity Separation — Full Release',
-    purpose: 'Deep separation after immersive work',
-    duration: '8 min',
-    icon: 'psychology',
-    route: '/return/exercise-identity-full',
-    requiresPro: true,
-  },
-];
+
 
 export default function ReturnToSelfListScreen() {
   const router = useRouter();
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<ExerciseOption | null>(null);
-  const [identitySeparationExpanded, setIdentitySeparationExpanded] = useState(false);
 
   useEffect(() => {
     checkTier();
@@ -137,80 +117,6 @@ export default function ReturnToSelfListScreen() {
 
           {/* Exercise Options */}
           <View style={styles.exercisesSection}>
-            {/* Identity Separation Group */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.exerciseCard,
-                pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
-              ]}
-              onPress={() => setIdentitySeparationExpanded(!identitySeparationExpanded)}
-            >
-              <View style={styles.exerciseIcon}>
-                <MaterialIcons 
-                  name="psychology" 
-                  size={28} 
-                  color={colors.primary} 
-                />
-              </View>
-              <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseTitle}>Identity Separation</Text>
-                <Text style={styles.exercisePurpose}>Choose depth of separation</Text>
-              </View>
-              <MaterialIcons 
-                name={identitySeparationExpanded ? "expand-less" : "expand-more"} 
-                size={24} 
-                color={colors.textSecondary} 
-              />
-            </Pressable>
-
-            {/* Identity Separation Variants (Expanded) */}
-            {identitySeparationExpanded && (
-              <View style={styles.variantsContainer}>
-                {IDENTITY_SEPARATION_VARIANTS.map(exercise => {
-                  const isLocked = exercise.requiresPro && !isPro;
-                  return (
-                    <Pressable
-                      key={exercise.id}
-                      style={({ pressed }) => [
-                        styles.variantCard,
-                        isLocked && styles.exerciseCardLocked,
-                        pressed && !isLocked && { opacity: 0.7, transform: [{ scale: 0.98 }] }
-                      ]}
-                      onPress={() => handleSelectExercise(exercise)}
-                    >
-                      <View style={styles.variantContent}>
-                        <View style={styles.exerciseHeader}>
-                          <Text style={[styles.variantTitle, isLocked && styles.exerciseTitleLocked]}>
-                            {exercise.title}
-                          </Text>
-                          {isLocked && (
-                            <View style={styles.proBadge}>
-                              <Text style={styles.proBadgeText}>PRO</Text>
-                            </View>
-                          )}
-                        </View>
-                        <Text style={[styles.variantPurpose, isLocked && styles.exercisePurposeLocked]}>
-                          {exercise.purpose}
-                        </Text>
-                        <View style={styles.exerciseMeta}>
-                          <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
-                          <Text style={[styles.exerciseDuration, isLocked && styles.exerciseDurationLocked]}>
-                            {exercise.duration}
-                          </Text>
-                        </View>
-                      </View>
-                      <MaterialIcons 
-                        name="chevron-right" 
-                        size={24} 
-                        color={isLocked ? colors.textTertiary : colors.textSecondary} 
-                      />
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-
-            {/* Other Exercises */}
             {RETURN_TO_SELF_EXERCISES.map(exercise => {
               const isLocked = exercise.requiresPro && !isPro;
               return (

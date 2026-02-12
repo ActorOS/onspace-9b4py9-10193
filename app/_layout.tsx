@@ -65,6 +65,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="return/identity-separation-choose" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="return/exercise-grounding" 
           options={{ presentation: 'modal' }}
         />
