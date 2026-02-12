@@ -97,6 +97,25 @@ export const systemVoiceAudio = {
     widen: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_06_widen.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/gentle-grounding/grounding_07_close.mp3',
   },
+
+  /**
+   * Identity Separation Full Release (12-step comprehensive version)
+   * Deep separation process for medium/heavy workload sessions
+   */
+  exerciseIdentityFull: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_01_arrival.mp3',
+    noticeRole: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_02_notice_role.mp3',
+    locate: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_03_locate.mp3',
+    name: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_04_name.mp3',
+    boundary: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_05_boundary.mp3',
+    releaseEffort: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_06_release_effort.mp3',
+    discharge: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_07_discharge.mp3',
+    returnBreath: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_08_return_breath.mp3',
+    reclaimName: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_09_reclaim_name.mp3',
+    reclaimPosture: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_10_reclaim_posture.mp3',
+    reclaimSpace: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_11_reclaim_space.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_12_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
