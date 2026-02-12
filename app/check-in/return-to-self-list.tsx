@@ -19,13 +19,31 @@ type ExerciseOption = {
 
 const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
   {
-    id: 'identity-separation',
-    title: 'Identity Separation',
-    purpose: 'Choose depth of separation',
-    duration: '8-12 min',
+    id: 'identity-light',
+    title: 'Identity Separation — Light',
+    purpose: 'Quick separation from role',
+    duration: '3 min',
     icon: 'psychology',
-    route: '/return/identity-separation-tiers',
+    route: '/return/exercise-identity-light',
     requiresPro: false,
+  },
+  {
+    id: 'identity-standard',
+    title: 'Identity Separation',
+    purpose: 'Guided prompts to distinguish self from character',
+    duration: '10 min',
+    icon: 'psychology',
+    route: '/return/exercise-identity',
+    requiresPro: true,
+  },
+  {
+    id: 'identity-full',
+    title: 'Identity Separation — Full Release',
+    purpose: 'Deep separation + full return to self',
+    duration: '8 min',
+    icon: 'psychology',
+    route: '/return/exercise-identity-full',
+    requiresPro: true,
   },
   {
     id: 'breath-settling',
