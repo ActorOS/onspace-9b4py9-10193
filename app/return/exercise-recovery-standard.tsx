@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { tierStorage } from '@/services/tierStorage';
 
 // Full Body Recovery Standard - 10-minute balanced version
 // Comprehensive somatic release with guided breath + discharge - ~9-11 minutes
@@ -38,6 +39,7 @@ export default function FullBodyRecoveryStandardScreen() {
   const waveOpacity = useSharedValue(0.4);
 
   useEffect(() => {
+    checkProAccess();
     initSession();
 
     return () => {
@@ -49,6 +51,19 @@ export default function FullBodyRecoveryStandardScreen() {
       }
     };
   }, []);
+
+  const checkProAccess = async () => {
+    const tier = await tierStorage.getTier();
+    if (tier !== 'pro') {
+      Alert.alert(
+        'Pro Feature',
+        'Full Body Recovery (Standard) is a Pro feature. Upgrade to access extended somatic exercises.',
+        [
+          { text: 'OK', onPress: () => router.back() }
+        ]
+      );
+    }
+  };
 
   const initSession = async () => {
     try {

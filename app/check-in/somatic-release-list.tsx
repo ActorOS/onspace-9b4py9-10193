@@ -34,7 +34,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     duration: '10 min',
     icon: 'spa',
     route: '/return/exercise-recovery-standard',
-    requiresPro: false,
+    requiresPro: true,
   },
   {
     id: 'full-recovery',
@@ -43,7 +43,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     duration: '15 min',
     icon: 'spa',
     route: '/return/exercise-recovery',
-    requiresPro: false,
+    requiresPro: true,
   },
   {
     id: 'bodyscan',
