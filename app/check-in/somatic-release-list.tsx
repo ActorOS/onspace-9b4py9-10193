@@ -19,6 +19,15 @@ type ExerciseOption = {
 
 const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
   {
+    id: 'full-recovery-light',
+    title: 'Full Body Recovery (Light)',
+    purpose: 'Quick somatic release and reset',
+    duration: '5 min',
+    icon: 'spa',
+    route: '/return/exercise-recovery-light',
+    requiresPro: false,
+  },
+  {
     id: 'full-recovery',
     title: 'Full Body Recovery',
     purpose: 'Complete somatic release with discharge',
