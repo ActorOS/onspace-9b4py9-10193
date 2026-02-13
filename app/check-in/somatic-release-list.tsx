@@ -19,6 +19,15 @@ type ExerciseOption = {
 
 const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
   {
+    id: 'full-recovery',
+    title: 'Full Body Recovery',
+    purpose: 'Complete somatic release with discharge',
+    duration: '15 min',
+    icon: 'spa',
+    route: '/return/exercise-recovery',
+    requiresPro: false,
+  },
+  {
     id: 'bodyscan',
     title: 'Body Scan',
     purpose: 'Release character tension',
@@ -32,7 +41,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     title: 'Breathing & Release',
     purpose: 'Nervous system reset',
     duration: '8 min',
-    icon: 'spa',
+    icon: 'air',
     route: '/return/exercise-breathing',
     requiresPro: false,
   },
