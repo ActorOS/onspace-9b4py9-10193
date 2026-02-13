@@ -81,6 +81,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="return/exercise-recovery-standard" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
           name="return/exercise-recovery-light" 
           options={{ presentation: 'modal' }}
         />

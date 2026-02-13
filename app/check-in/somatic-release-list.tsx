@@ -28,6 +28,15 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     requiresPro: false,
   },
   {
+    id: 'full-recovery-standard',
+    title: 'Full Body Recovery (Standard)',
+    purpose: 'Balanced somatic release with discharge',
+    duration: '10 min',
+    icon: 'spa',
+    route: '/return/exercise-recovery-standard',
+    requiresPro: false,
+  },
+  {
     id: 'full-recovery',
     title: 'Full Body Recovery',
     purpose: 'Complete somatic release with discharge',
