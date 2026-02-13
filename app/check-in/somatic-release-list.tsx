@@ -11,7 +11,6 @@ type ExerciseOption = {
   id: string;
   title: string;
   purpose: string;
-  duration: string;
   icon: string;
   route: string;
   requiresPro: boolean;
@@ -22,7 +21,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'full-recovery-light',
     title: 'Full Body Recovery (Light)',
     purpose: 'Quick somatic release and reset',
-    duration: '5 min',
     icon: 'spa',
     route: '/return/exercise-recovery-light',
     requiresPro: false,
@@ -31,7 +29,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'full-recovery-standard',
     title: 'Full Body Recovery (Standard)',
     purpose: 'Balanced somatic release with discharge',
-    duration: '10 min',
     icon: 'spa',
     route: '/return/exercise-recovery-standard',
     requiresPro: true,
@@ -40,7 +37,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'full-recovery',
     title: 'Full Body Recovery',
     purpose: 'Complete somatic release with discharge',
-    duration: '15 min',
     icon: 'spa',
     route: '/return/exercise-recovery',
     requiresPro: true,
@@ -49,7 +45,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'bodyscan',
     title: 'Body Scan',
     purpose: 'Release character tension',
-    duration: '12 min',
     icon: 'self-improvement',
     route: '/return/exercise-bodyscan',
     requiresPro: false,
@@ -58,7 +53,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'breathing',
     title: 'Breathing & Release',
     purpose: 'Nervous system reset',
-    duration: '8 min',
     icon: 'air',
     route: '/return/exercise-breathing',
     requiresPro: false,
@@ -67,7 +61,6 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     id: 'movement',
     title: 'Quick Movement',
     purpose: 'Shake out residual energy',
-    duration: '2 min',
     icon: 'directions-run',
     route: '/return/quick-movement',
     requiresPro: false,
@@ -157,12 +150,6 @@ export default function SomaticReleaseListScreen() {
                     <Text style={[styles.exercisePurpose, isLocked && styles.exercisePurposeLocked]}>
                       {exercise.purpose}
                     </Text>
-                    <View style={styles.exerciseMeta}>
-                      <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
-                      <Text style={[styles.exerciseDuration, isLocked && styles.exerciseDurationLocked]}>
-                        {exercise.duration}
-                      </Text>
-                    </View>
                   </View>
                   <MaterialIcons 
                     name="chevron-right" 
@@ -311,18 +298,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   exercisePurposeLocked: {
-    color: colors.textTertiary,
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs / 2,
-  },
-  exerciseDuration: {
-    fontSize: typography.sizes.xs,
-    color: colors.textSecondary,
-  },
-  exerciseDurationLocked: {
     color: colors.textTertiary,
   },
   proBadge: {

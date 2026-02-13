@@ -12,7 +12,6 @@ type ExerciseOption = {
   id: string;
   title: string;
   purpose: string;
-  duration: string;
   icon: string;
   route: string;
   workload: ('light' | 'medium' | 'heavy')[];
@@ -24,7 +23,6 @@ const EXERCISE_OPTIONS: ExerciseOption[] = [
     id: 'gentle-grounding',
     title: 'Gentle Grounding',
     purpose: 'Sensory grounding to present moment',
-    duration: '6 min',
     icon: 'my-location',
     route: '/return/exercise-grounding',
     workload: ['light'],
@@ -34,7 +32,6 @@ const EXERCISE_OPTIONS: ExerciseOption[] = [
     id: 'breathing',
     title: 'Breathing & Release',
     purpose: 'Gentle nervous system reset',
-    duration: '8 min',
     icon: 'spa',
     route: '/return/exercise-breathing',
     workload: ['light', 'medium', 'heavy'],
@@ -44,7 +41,6 @@ const EXERCISE_OPTIONS: ExerciseOption[] = [
     id: 'bodyscan',
     title: 'Body Scan',
     purpose: 'Release character tension',
-    duration: '12 min',
     icon: 'self-improvement',
     route: '/return/exercise-bodyscan',
     workload: ['medium', 'heavy'],
@@ -54,7 +50,6 @@ const EXERCISE_OPTIONS: ExerciseOption[] = [
     id: 'identity-separation',
     title: 'Identity Separation',
     purpose: 'Choose your level: Light, Standard, or Full',
-    duration: '3-12 min',
     icon: 'psychology',
     route: '/return/identity-separation-tiers',
     workload: ['light', 'medium', 'heavy'],
@@ -98,15 +93,7 @@ export default function RecommendedReleaseListScreen() {
     if (!workloadLevel) return EXERCISE_OPTIONS.filter(ex => !ex.requiresPro || isPro);
     
     // Filter by workload level
-    const filtered = EXERCISE_OPTIONS.filter(ex => ex.workload.includes(workloadLevel));
-    
-    // Sort based on workload
-    if (workloadLevel === 'heavy') {
-      return filtered.sort((a, b) => parseInt(b.duration) - parseInt(a.duration));
-    } else if (workloadLevel === 'light') {
-      return filtered.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
-    }
-    return filtered;
+    return EXERCISE_OPTIONS.filter(ex => ex.workload.includes(workloadLevel));
   };
 
   const handleSelectExercise = (exercise: ExerciseOption) => {
@@ -187,12 +174,6 @@ export default function RecommendedReleaseListScreen() {
                       <Text style={[styles.exercisePurpose, isLocked && styles.exercisePurposeLocked]}>
                         {exercise.purpose}
                       </Text>
-                      <View style={styles.exerciseMeta}>
-                        <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
-                        <Text style={[styles.exerciseDuration, isLocked && styles.exerciseDurationLocked]}>
-                          {exercise.duration}
-                        </Text>
-                      </View>
                     </View>
                     <MaterialIcons 
                       name="chevron-right" 
@@ -348,18 +329,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   exercisePurposeLocked: {
-    color: colors.textTertiary,
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs / 2,
-  },
-  exerciseDuration: {
-    fontSize: typography.sizes.xs,
-    color: colors.textSecondary,
-  },
-  exerciseDurationLocked: {
     color: colors.textTertiary,
   },
   proBadge: {

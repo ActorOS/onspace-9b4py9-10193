@@ -106,10 +106,6 @@ export default function GroundingScreen() {
                 <Text style={styles.exerciseDescription}>
                   Return your nervous system to baseline
                 </Text>
-                <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>5 min</Text>
-                </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
@@ -126,10 +122,6 @@ export default function GroundingScreen() {
                 <Text style={styles.exerciseDescription}>
                   Release character tension held in the body
                 </Text>
-                <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>10 min</Text>
-                </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
@@ -146,10 +138,6 @@ export default function GroundingScreen() {
                 <Text style={styles.exerciseDescription}>
                   Choose your level: Light, Standard, or Full
                 </Text>
-                <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>3-12 min</Text>
-                </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
@@ -374,18 +362,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   exerciseDescriptionLocked: {
-    color: colors.textTertiary,
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs / 2,
-  },
-  exerciseTime: {
-    fontSize: typography.sizes.xs,
-    color: colors.textTertiary,
-  },
-  exerciseTimeLocked: {
     color: colors.textTertiary,
   },
   proBadge: {

@@ -10,7 +10,6 @@ import { UpgradePrompt } from '@/components';
 type IdentityTier = {
   id: string;
   title: string;
-  duration: string;
   description: string;
   route: string;
   requiresPro: boolean;
@@ -20,7 +19,6 @@ const IDENTITY_TIERS: IdentityTier[] = [
   {
     id: 'light',
     title: 'Identity Separation — Light',
-    duration: '3 min',
     description: 'Quick separation from role',
     route: '/return/exercise-identity-light',
     requiresPro: false,
@@ -28,7 +26,6 @@ const IDENTITY_TIERS: IdentityTier[] = [
   {
     id: 'standard',
     title: 'Identity Separation — Standard',
-    duration: '10 min',
     description: 'Structured return to self',
     route: '/return/exercise-identity',
     requiresPro: true,
@@ -36,7 +33,6 @@ const IDENTITY_TIERS: IdentityTier[] = [
   {
     id: 'full',
     title: 'Identity Separation — Full Release',
-    duration: '12 min',
     description: 'Deep separation after immersive work',
     route: '/return/exercise-identity-full',
     requiresPro: true,
@@ -124,10 +120,6 @@ export default function IdentitySeparationTiersScreen() {
                       )}
                     </View>
                     <Text style={[styles.tierDescription, isLocked && styles.tierDescriptionLocked]}>{tier.description}</Text>
-                    <View style={styles.tierMeta}>
-                      <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
-                      <Text style={[styles.tierDuration, isLocked && styles.tierDurationLocked]}>{tier.duration}</Text>
-                    </View>
                   </View>
                   {isLocked && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
                   <MaterialIcons 
@@ -275,18 +267,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   tierDescriptionLocked: {
-    color: colors.textTertiary,
-  },
-  tierMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs / 2,
-  },
-  tierDuration: {
-    fontSize: typography.sizes.xs,
-    color: colors.textSecondary,
-  },
-  tierDurationLocked: {
     color: colors.textTertiary,
   },
   proBadge: {

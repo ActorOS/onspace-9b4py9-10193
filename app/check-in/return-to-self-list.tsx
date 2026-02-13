@@ -11,7 +11,6 @@ type ExerciseOption = {
   id: string;
   title: string;
   purpose: string;
-  duration: string;
   icon: string;
   route: string;
   requiresPro: boolean;
@@ -22,7 +21,6 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'identity-separation',
     title: 'Identity Separation',
     purpose: 'Choose your level: Light, Standard, or Full',
-    duration: '3-12 min',
     icon: 'psychology',
     route: '/return/identity-separation-tiers',
     requiresPro: false,
@@ -31,7 +29,6 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'breath-settling',
     title: 'Breath Settling',
     purpose: 'Voice-led grounding practice',
-    duration: '2 min',
     icon: 'air',
     route: '/somatic/play-track?trackType=breath_settling&fromPostWork=true',
     requiresPro: true,
@@ -40,7 +37,6 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'quick-name',
     title: 'Name Yourself',
     purpose: 'Ground in your own identity',
-    duration: '1 min',
     icon: 'badge',
     route: '/return/quick-name',
     requiresPro: false,
@@ -49,7 +45,6 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'quick-location',
     title: 'Where Are You',
     purpose: 'Orient to present location',
-    duration: '1 min',
     icon: 'place',
     route: '/return/quick-location',
     requiresPro: false,
@@ -58,7 +53,6 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     id: 'quick-date',
     title: 'What Day Is It',
     purpose: 'Orient to present time',
-    duration: '1 min',
     icon: 'today',
     route: '/return/quick-date',
     requiresPro: false,
@@ -150,12 +144,6 @@ export default function ReturnToSelfListScreen() {
                     <Text style={[styles.exercisePurpose, isLocked && styles.exercisePurposeLocked]}>
                       {exercise.purpose}
                     </Text>
-                    <View style={styles.exerciseMeta}>
-                      <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
-                      <Text style={[styles.exerciseDuration, isLocked && styles.exerciseDurationLocked]}>
-                        {exercise.duration}
-                      </Text>
-                    </View>
                   </View>
                   <MaterialIcons 
                     name="chevron-right" 
@@ -292,18 +280,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   exercisePurposeLocked: {
-    color: colors.textTertiary,
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs / 2,
-  },
-  exerciseDuration: {
-    fontSize: typography.sizes.xs,
-    color: colors.textSecondary,
-  },
-  exerciseDurationLocked: {
     color: colors.textTertiary,
   },
   proBadge: {
