@@ -478,7 +478,7 @@ export default function IdentitySeparationFullScreen() {
             <Text style={styles.welcomeText}>
               Identity Separation — Full Release is a PRO-only exercise.
               {"\n\n"}
-              Upgrade to unlock the complete 12-minute separation process with deep discharge and reintegration.
+              Upgrade to unlock the complete separation process with deep discharge and reintegration.
             </Text>
           </View>
         </View>
@@ -524,7 +524,7 @@ export default function IdentitySeparationFullScreen() {
               <Text style={styles.welcomeTitle}>Identity Separation</Text>
               <Text style={styles.subtitleText}>Full Release Version</Text>
               <Text style={styles.welcomeText}>
-                A 12-minute guided process for complete separation after demanding work.
+                Deep separation after immersive work.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}

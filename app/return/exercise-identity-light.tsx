@@ -266,7 +266,7 @@ export default function IdentitySeparationLightScreen() {
               <Text style={styles.welcomeTitle}>Identity Separation</Text>
               <Text style={styles.subtitleText}>Light Version</Text>
               <Text style={styles.welcomeText}>
-                A 3-minute guided process to distinguish yourself from the role.
+                Quick separation from role.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}

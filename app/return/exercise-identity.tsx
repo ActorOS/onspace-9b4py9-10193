@@ -341,8 +341,9 @@ export default function IdentitySeparationScreen() {
             <>
               <MaterialIcons name="psychology" size={64} color={colors.textPrimary} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Identity Separation</Text>
+              <Text style={styles.subtitleText}>Standard Version</Text>
               <Text style={styles.welcomeText}>
-                A 10-minute guided process to distinguish yourself from the role you've been holding.
+                Structured return to self.
                 {'\n\n'}
                 Find a comfortable seated position. You may close your eyes once you begin.
                 {'\n\n'}
@@ -469,6 +470,14 @@ const styles = StyleSheet.create({
     fontFamily: typography.fonts.displayBold,
     fontWeight: typography.weights.bold,
     color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  subtitleText: {
+    fontSize: typography.sizes.md,
+    fontFamily: typography.fonts.body,
+    fontWeight: typography.weights.medium,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
