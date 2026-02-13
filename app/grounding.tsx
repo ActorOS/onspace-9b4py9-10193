@@ -136,85 +136,21 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => handleExercisePress('/return/exercise-identity-light', false)}
+              onPress={() => router.push('/return/identity-separation-tiers')}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="psychology" size={28} color={colors.primary} />
               </View>
               <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseTitle}>Identity Separation (Light)</Text>
+                <Text style={styles.exerciseTitle}>Identity Separation</Text>
                 <Text style={styles.exerciseDescription}>
-                  Quick separation from role
+                  Choose your level: Light, Standard, or Full
                 </Text>
                 <View style={styles.exerciseMeta}>
                   <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>3 min</Text>
+                  <Text style={styles.exerciseTime}>3-12 min</Text>
                 </View>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
-            </Pressable>
-
-            <Pressable 
-              style={({ pressed }) => [
-                styles.exerciseCard,
-                !isPro && styles.exerciseCardLocked,
-                pressed && isPro && { opacity: 0.7 }
-              ]}
-              onPress={() => handleExercisePress('/return/exercise-identity', true)}
-            >
-              <View style={styles.exerciseIcon}>
-                <MaterialIcons name="psychology" size={28} color={isPro ? colors.accent : colors.textTertiary} />
-              </View>
-              <View style={styles.exerciseContent}>
-                <View style={styles.exerciseHeader}>
-                  <Text style={[styles.exerciseTitle, !isPro && styles.exerciseTitleLocked]}>Identity Separation (Standard)</Text>
-                  {!isPro && (
-                    <View style={styles.proBadge}>
-                      <Text style={styles.proBadgeText}>PRO</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.exerciseDescription, !isPro && styles.exerciseDescriptionLocked]}>
-                  Guided prompts to distinguish self from character
-                </Text>
-                <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
-                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>10 min</Text>
-                </View>
-              </View>
-              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
-              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
-            </Pressable>
-
-            <Pressable 
-              style={({ pressed }) => [
-                styles.exerciseCard,
-                !isPro && styles.exerciseCardLocked,
-                pressed && isPro && { opacity: 0.7 }
-              ]}
-              onPress={() => handleExercisePress('/return/exercise-identity-full', true)}
-            >
-              <View style={styles.exerciseIcon}>
-                <MaterialIcons name="psychology" size={28} color={isPro ? colors.textPrimary : colors.textTertiary} />
-              </View>
-              <View style={styles.exerciseContent}>
-                <View style={styles.exerciseHeader}>
-                  <Text style={[styles.exerciseTitle, !isPro && styles.exerciseTitleLocked]}>Identity Separation</Text>
-                  {!isPro && (
-                    <View style={styles.proBadge}>
-                      <Text style={styles.proBadgeText}>PRO</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.exerciseDescription, !isPro && styles.exerciseDescriptionLocked]}>
-                  Full Release (PRO)
-                </Text>
-                <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
-                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>12 min</Text>
-                </View>
-              </View>
-              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
           </View>

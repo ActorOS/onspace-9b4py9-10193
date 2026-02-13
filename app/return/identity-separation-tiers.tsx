@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
+import { tierStorage } from '@/services/tierStorage';
+import { UpgradePrompt } from '@/components';
 
 type IdentityTier = {
   id: string;
@@ -11,15 +13,17 @@ type IdentityTier = {
   duration: string;
   description: string;
   route: string;
+  requiresPro: boolean;
 };
 
 const IDENTITY_TIERS: IdentityTier[] = [
   {
     id: 'light',
     title: 'Identity Separation — Light',
-    duration: '8 min',
-    description: 'Gentle distinction from role',
+    duration: '3 min',
+    description: 'Quick separation from role',
     route: '/return/exercise-identity-light',
+    requiresPro: false,
   },
   {
     id: 'standard',
@@ -27,6 +31,7 @@ const IDENTITY_TIERS: IdentityTier[] = [
     duration: '10 min',
     description: 'Structured return to self',
     route: '/return/exercise-identity',
+    requiresPro: true,
   },
   {
     id: 'full',
@@ -34,13 +39,31 @@ const IDENTITY_TIERS: IdentityTier[] = [
     duration: '12 min',
     description: 'Deep separation after immersive work',
     route: '/return/exercise-identity-full',
+    requiresPro: true,
   },
 ];
 
 export default function IdentitySeparationTiersScreen() {
   const router = useRouter();
+  const [isPro, setIsPro] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<IdentityTier | null>(null);
+
+  useEffect(() => {
+    checkTier();
+  }, []);
+
+  const checkTier = async () => {
+    const tier = await tierStorage.getTier();
+    setIsPro(tier === 'pro');
+  };
 
   const handleSelectTier = (tier: IdentityTier) => {
+    if (tier.requiresPro && !isPro) {
+      setSelectedTier(tier);
+      setShowUpgradePrompt(true);
+      return;
+    }
     router.push(tier.route as any);
   };
 
@@ -72,37 +95,49 @@ export default function IdentitySeparationTiersScreen() {
 
           {/* Tier Cards */}
           <View style={styles.tiersSection}>
-            {IDENTITY_TIERS.map((tier) => (
-              <Pressable
-                key={tier.id}
-                style={({ pressed }) => [
-                  styles.tierCard,
-                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
-                ]}
-                onPress={() => handleSelectTier(tier)}
-              >
-                <View style={styles.tierIcon}>
-                  <MaterialIcons 
-                    name="psychology" 
-                    size={32} 
-                    color={colors.primary} 
-                  />
-                </View>
-                <View style={styles.tierContent}>
-                  <Text style={styles.tierTitle}>{tier.title}</Text>
-                  <Text style={styles.tierDescription}>{tier.description}</Text>
-                  <View style={styles.tierMeta}>
-                    <MaterialIcons name="schedule" size={14} color={colors.textSecondary} />
-                    <Text style={styles.tierDuration}>{tier.duration}</Text>
+            {IDENTITY_TIERS.map((tier) => {
+              const isLocked = tier.requiresPro && !isPro;
+              return (
+                <Pressable
+                  key={tier.id}
+                  style={({ pressed }) => [
+                    styles.tierCard,
+                    isLocked && styles.tierCardLocked,
+                    pressed && !isLocked && { opacity: 0.7, transform: [{ scale: 0.98 }] }
+                  ]}
+                  onPress={() => handleSelectTier(tier)}
+                >
+                  <View style={styles.tierIcon}>
+                    <MaterialIcons 
+                      name="psychology" 
+                      size={32} 
+                      color={isLocked ? colors.textTertiary : colors.primary} 
+                    />
                   </View>
-                </View>
-                <MaterialIcons 
-                  name="chevron-right" 
-                  size={24} 
-                  color={colors.textSecondary} 
-                />
-              </Pressable>
-            ))}
+                  <View style={styles.tierContent}>
+                    <View style={styles.tierHeader}>
+                      <Text style={[styles.tierTitle, isLocked && styles.tierTitleLocked]}>{tier.title}</Text>
+                      {isLocked && (
+                        <View style={styles.proBadge}>
+                          <Text style={styles.proBadgeText}>PRO</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.tierDescription, isLocked && styles.tierDescriptionLocked]}>{tier.description}</Text>
+                    <View style={styles.tierMeta}>
+                      <MaterialIcons name="schedule" size={14} color={isLocked ? colors.textTertiary : colors.textSecondary} />
+                      <Text style={[styles.tierDuration, isLocked && styles.tierDurationLocked]}>{tier.duration}</Text>
+                    </View>
+                  </View>
+                  {isLocked && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
+                  <MaterialIcons 
+                    name="chevron-right" 
+                    size={24} 
+                    color={colors.textSecondary} 
+                  />
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Info Section */}
@@ -126,6 +161,13 @@ export default function IdentitySeparationTiersScreen() {
           <Text style={styles.backToListButtonText}>Back to Exercise List</Text>
         </Pressable>
       </View>
+
+      <UpgradePrompt
+        visible={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        feature={selectedTier?.title || 'Identity Separation'}
+        description={`Pro unlocks ${selectedTier?.title} and other advanced identity separation exercises.`}
+      />
     </SafeAreaView>
   );
 }
@@ -198,6 +240,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  tierCardLocked: {
+    opacity: 0.6,
+  },
   tierIcon: {
     width: 64,
     height: 64,
@@ -210,16 +255,27 @@ const styles = StyleSheet.create({
   tierContent: {
     flex: 1,
   },
+  tierHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs / 2,
+  },
   tierTitle: {
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
     color: colors.textPrimary,
-    marginBottom: spacing.xs / 2,
+  },
+  tierTitleLocked: {
+    color: colors.textSecondary,
   },
   tierDescription: {
     fontSize: typography.sizes.sm,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
+  },
+  tierDescriptionLocked: {
+    color: colors.textTertiary,
   },
   tierMeta: {
     flexDirection: 'row',
@@ -229,6 +285,21 @@ const styles = StyleSheet.create({
   tierDuration: {
     fontSize: typography.sizes.xs,
     color: colors.textSecondary,
+  },
+  tierDurationLocked: {
+    color: colors.textTertiary,
+  },
+  proBadge: {
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs / 2,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.sm,
+  },
+  proBadgeText: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   infoSection: {
     backgroundColor: colors.surfaceElevated,
