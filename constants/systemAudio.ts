@@ -120,6 +120,23 @@ export const systemVoiceAudio = {
     reintegration: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_15_reintegration.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Identity%20seperation%20full/identity_full_16_close.mp3',
   },
+
+  /**
+   * Full Body Recovery Sequence
+   * Comprehensive somatic release with guided breath + discharge - ~14-16 minutes
+   */
+  exerciseRecovery: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_01_%20arrival.mp3',
+    breathOrientation: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_02_breath_orientation.mp3',
+    inhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/voice_segment_A.mp3',
+    exhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/voice_segment_B.mp3',
+    faceRelease: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_04_jaw+face_release.mp3',
+    shoulderRelease: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_05_shoulder+arm%20drop.mp3',
+    discharge: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_06_somatic+discharge.mp3',
+    scan: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_08_body+scan+intergration.mp3',
+    reclaim: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_09_reclaiming+self.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_10_close%20.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
