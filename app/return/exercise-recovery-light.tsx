@@ -344,7 +344,7 @@ export default function FullBodyRecoveryLightScreen() {
               <Text style={styles.welcomeTitle}>Full Body Recovery</Text>
               <Text style={styles.subtitleText}>Light Version</Text>
               <Text style={styles.welcomeText}>
-                A 5-minute guided process for quick somatic release and nervous system reset.
+                Subtle reset after rehearsal.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}

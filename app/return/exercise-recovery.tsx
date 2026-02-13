@@ -415,7 +415,7 @@ export default function FullBodyRecoveryScreen() {
               <Text style={styles.welcomeTitle}>Full Body Recovery</Text>
               <Text style={styles.subtitleText}>Guided Sequence</Text>
               <Text style={styles.welcomeText}>
-                A 15-minute guided process for complete somatic release and nervous system reset.
+                Complete recovery after demanding work.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}

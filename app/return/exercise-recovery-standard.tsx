@@ -398,7 +398,7 @@ export default function FullBodyRecoveryStandardScreen() {
               <Text style={styles.welcomeTitle}>Full Body Recovery</Text>
               <Text style={styles.subtitleText}>Standard Version</Text>
               <Text style={styles.welcomeText}>
-                A 10-minute guided process for somatic release and nervous system reset.
+                Restore balance after performance.
                 {'\n\n'}
                 Find a comfortable position. You may close your eyes once you begin.
                 {'\n\n'}

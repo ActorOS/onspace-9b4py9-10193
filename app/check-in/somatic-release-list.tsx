@@ -20,7 +20,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
   {
     id: 'full-recovery-light',
     title: 'Full Body Recovery (Light)',
-    purpose: 'Quick somatic release and reset',
+    purpose: 'Subtle reset after rehearsal.',
     icon: 'spa',
     route: '/return/exercise-recovery-light',
     requiresPro: false,
@@ -28,7 +28,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
   {
     id: 'full-recovery-standard',
     title: 'Full Body Recovery (Standard)',
-    purpose: 'Balanced somatic release with discharge',
+    purpose: 'Restore balance after performance.',
     icon: 'spa',
     route: '/return/exercise-recovery-standard',
     requiresPro: true,
@@ -36,7 +36,7 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
   {
     id: 'full-recovery',
     title: 'Full Body Recovery',
-    purpose: 'Complete somatic release with discharge',
+    purpose: 'Complete recovery after demanding work.',
     icon: 'spa',
     route: '/return/exercise-recovery',
     requiresPro: true,
