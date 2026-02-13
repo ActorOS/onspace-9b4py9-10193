@@ -127,11 +127,10 @@ export default function GroundingScreen() {
                   Release character tension held in the body
                 </Text>
                 <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
-                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>10 min</Text>
+                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
+                  <Text style={styles.exerciseTime}>10 min</Text>
                 </View>
               </View>
-              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
 
