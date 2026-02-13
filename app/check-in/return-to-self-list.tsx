@@ -38,9 +38,9 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
   },
   {
     id: 'identity-full',
-    title: 'Identity Separation — Full Release',
-    purpose: 'Deep separation + full return to self',
-    duration: '8 min',
+    title: 'Identity Separation',
+    purpose: 'Full Release (PRO)',
+    duration: '12 min',
     icon: 'psychology',
     route: '/return/exercise-identity-full',
     requiresPro: true,

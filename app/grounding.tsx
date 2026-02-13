@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,9 +7,30 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { sessionStorage } from '@/services/sessionStorage';
+import { tierStorage } from '@/services/tierStorage';
+import { UpgradePrompt } from '@/components';
 
 export default function GroundingScreen() {
   const router = useRouter();
+  const [isPro, setIsPro] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  useEffect(() => {
+    checkTier();
+  }, []);
+
+  const checkTier = async () => {
+    const tier = await tierStorage.getTier();
+    setIsPro(tier === 'pro');
+  };
+
+  const handleExercisePress = (route: string, requiresPro: boolean = false) => {
+    if (requiresPro && !isPro) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    router.push(route as any);
+  };
 
   const handleReturned = async () => {
     try {
@@ -74,7 +96,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => router.push('/return/exercise-breathing')}
+              onPress={() => handleExercisePress('/return/exercise-breathing', false)}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="air" size={28} color={colors.primary} />
@@ -94,7 +116,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => router.push('/return/exercise-bodyscan')}
+              onPress={() => handleExercisePress('/return/exercise-bodyscan', false)}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="self-improvement" size={28} color={colors.accent} />
@@ -105,16 +127,17 @@ export default function GroundingScreen() {
                   Release character tension held in the body
                 </Text>
                 <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>10 min</Text>
+                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
+                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>10 min</Text>
                 </View>
               </View>
+              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => router.push('/return/exercise-identity-light')}
+              onPress={() => handleExercisePress('/return/exercise-identity-light', false)}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="psychology" size={28} color={colors.primary} />
@@ -133,42 +156,66 @@ export default function GroundingScreen() {
             </Pressable>
 
             <Pressable 
-              style={styles.exerciseCard}
-              onPress={() => router.push('/return/exercise-identity')}
+              style={({ pressed }) => [
+                styles.exerciseCard,
+                !isPro && styles.exerciseCardLocked,
+                pressed && isPro && { opacity: 0.7 }
+              ]}
+              onPress={() => handleExercisePress('/return/exercise-identity', true)}
             >
               <View style={styles.exerciseIcon}>
-                <MaterialIcons name="psychology" size={28} color={colors.accent} />
+                <MaterialIcons name="psychology" size={28} color={isPro ? colors.accent : colors.textTertiary} />
               </View>
               <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseTitle}>Identity Separation (Standard)</Text>
-                <Text style={styles.exerciseDescription}>
+                <View style={styles.exerciseHeader}>
+                  <Text style={[styles.exerciseTitle, !isPro && styles.exerciseTitleLocked]}>Identity Separation (Standard)</Text>
+                  {!isPro && (
+                    <View style={styles.proBadge}>
+                      <Text style={styles.proBadgeText}>PRO</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.exerciseDescription, !isPro && styles.exerciseDescriptionLocked]}>
                   Guided prompts to distinguish self from character
                 </Text>
                 <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>10 min</Text>
+                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
+                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>10 min</Text>
                 </View>
               </View>
+              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
 
             <Pressable 
-              style={styles.exerciseCard}
-              onPress={() => router.push('/return/exercise-identity-full')}
+              style={({ pressed }) => [
+                styles.exerciseCard,
+                !isPro && styles.exerciseCardLocked,
+                pressed && isPro && { opacity: 0.7 }
+              ]}
+              onPress={() => handleExercisePress('/return/exercise-identity-full', true)}
             >
               <View style={styles.exerciseIcon}>
-                <MaterialIcons name="psychology" size={28} color={colors.textPrimary} />
+                <MaterialIcons name="psychology" size={28} color={isPro ? colors.textPrimary : colors.textTertiary} />
               </View>
               <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseTitle}>Identity Separation (Full)</Text>
-                <Text style={styles.exerciseDescription}>
-                  Deep separation + full return to self
+                <View style={styles.exerciseHeader}>
+                  <Text style={[styles.exerciseTitle, !isPro && styles.exerciseTitleLocked]}>Identity Separation</Text>
+                  {!isPro && (
+                    <View style={styles.proBadge}>
+                      <Text style={styles.proBadgeText}>PRO</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.exerciseDescription, !isPro && styles.exerciseDescriptionLocked]}>
+                  Full Release (PRO)
                 </Text>
                 <View style={styles.exerciseMeta}>
-                  <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>12 min</Text>
+                  <MaterialIcons name="schedule" size={14} color={isPro ? colors.textTertiary : colors.textTertiary} />
+                  <Text style={[styles.exerciseTime, !isPro && styles.exerciseTimeLocked]}>12 min</Text>
                 </View>
               </View>
+              {!isPro && <MaterialIcons name="lock" size={20} color={colors.textTertiary} style={{ marginRight: spacing.xs }} />}
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
           </View>
@@ -257,6 +304,13 @@ export default function GroundingScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <UpgradePrompt
+        visible={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        feature="Identity Separation (Full Release)"
+        description="Pro unlocks the complete 12-minute Identity Separation exercise with deep discharge and reintegration steps for demanding emotional work."
+      />
 
       {/* Footer */}
       <View style={styles.footer}>
@@ -350,6 +404,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  exerciseCardLocked: {
+    opacity: 0.65,
+  },
   exerciseIcon: {
     width: 48,
     height: 48,
@@ -362,16 +419,27 @@ const styles = StyleSheet.create({
   exerciseContent: {
     flex: 1,
   },
+  exerciseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs / 2,
+  },
   exerciseTitle: {
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
     color: colors.textPrimary,
-    marginBottom: spacing.xs / 2,
+  },
+  exerciseTitleLocked: {
+    color: colors.textSecondary,
   },
   exerciseDescription: {
     fontSize: typography.sizes.sm,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
+  },
+  exerciseDescriptionLocked: {
+    color: colors.textTertiary,
   },
   exerciseMeta: {
     flexDirection: 'row',
@@ -381,6 +449,21 @@ const styles = StyleSheet.create({
   exerciseTime: {
     fontSize: typography.sizes.xs,
     color: colors.textTertiary,
+  },
+  exerciseTimeLocked: {
+    color: colors.textTertiary,
+  },
+  proBadge: {
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs / 2,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.sm,
+  },
+  proBadgeText: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   quickResetGrid: {
     flexDirection: 'row',

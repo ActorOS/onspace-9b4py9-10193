@@ -8,6 +8,8 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { tierStorage } from '@/services/tierStorage';
+import { UpgradePrompt } from '@/components';
 
 // Identity Separation Full Release - 16-step comprehensive version
 // Deep separation process for medium/heavy workload sessions - ~12 minutes
@@ -34,6 +36,9 @@ type IdentityFullStep =
 
 export default function IdentitySeparationFullScreen() {
   const router = useRouter();
+  const [isPro, setIsPro] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<IdentityFullStep>('arrival');
@@ -44,8 +49,20 @@ export default function IdentitySeparationFullScreen() {
   const waveOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    const initSession = async () => {
+    const checkAccessAndInit = async () => {
       try {
+        // Check Pro status first
+        const tier = await tierStorage.getTier();
+        const isProUser = tier === 'pro';
+        setIsPro(isProUser);
+        
+        if (!isProUser) {
+          setIsCheckingAccess(false);
+          setShowUpgradePrompt(true);
+          return;
+        }
+        
+        // Initialize session for Pro users
         const roleId = await returnSessionStorage.getActiveRoleId();
         const session = await returnSessionStorage.saveExerciseSession({
           createdAt: new Date().toISOString(),
@@ -55,11 +72,13 @@ export default function IdentitySeparationFullScreen() {
           completed: false,
         });
         setSessionId(session.id);
+        setIsCheckingAccess(false);
       } catch (error) {
-        console.error('Failed to start exercise:', error);
+        console.error('Failed to check access or start exercise:', error);
+        setIsCheckingAccess(false);
       }
     };
-    initSession();
+    checkAccessAndInit();
 
     return () => {
       if (soundRef.current) {
@@ -293,6 +312,12 @@ export default function IdentitySeparationFullScreen() {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    
+    if (!isPro) {
+      router.back();
+      return;
+    }
+    
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
@@ -301,6 +326,11 @@ export default function IdentitySeparationFullScreen() {
         { text: 'Exit', style: 'destructive', onPress: () => router.back() },
       ]
     );
+  };
+
+  const handleUpgradeClose = () => {
+    setShowUpgradePrompt(false);
+    router.back();
   };
 
   const waveAnimatedStyle = useAnimatedStyle(() => {
@@ -428,6 +458,53 @@ export default function IdentitySeparationFullScreen() {
         return 'psychology';
     }
   };
+
+  // Show upgrade prompt if not Pro
+  if (!isPro && !isCheckingAccess) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Pressable onPress={handleExit} style={styles.headerButton}>
+            <MaterialIcons name="close" size={24} color={colors.textPrimary} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Full Release</Text>
+          <View style={styles.headerButton} />
+        </View>
+        
+        <View style={styles.content}>
+          <View style={styles.stepContainer}>
+            <MaterialIcons name="lock" size={64} color={colors.textSecondary} style={{ marginBottom: spacing.xl }} />
+            <Text style={styles.welcomeTitle}>PRO Feature</Text>
+            <Text style={styles.welcomeText}>
+              Identity Separation — Full Release is a PRO-only exercise.
+              {"\n\n"}
+              Upgrade to unlock the complete 12-minute separation process with deep discharge and reintegration.
+            </Text>
+          </View>
+        </View>
+        
+        <UpgradePrompt
+          visible={showUpgradePrompt}
+          onClose={handleUpgradeClose}
+          feature="Identity Separation (Full Release)"
+          description="Pro unlocks the complete 12-minute Identity Separation exercise with deep discharge and reintegration steps for demanding emotional work."
+        />
+      </SafeAreaView>
+    );
+  }
+  
+  // Show loading state while checking
+  if (isCheckingAccess) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.content}>
+          <View style={styles.stepContainer}>
+            <Text style={styles.stepMessage}>Checking access...</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
