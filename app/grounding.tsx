@@ -126,7 +126,7 @@ export default function GroundingScreen() {
                 </Text>
                 <View style={styles.exerciseMeta}>
                   <MaterialIcons name="schedule" size={14} color={colors.textTertiary} />
-                  <Text style={styles.exerciseTime}>8 min</Text>
+                  <Text style={styles.exerciseTime}>3 min</Text>
                 </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />

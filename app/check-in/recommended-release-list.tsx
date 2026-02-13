@@ -54,7 +54,7 @@ const EXERCISE_OPTIONS: ExerciseOption[] = [
     id: 'identity-light',
     title: 'Identity Separation (Light)',
     purpose: 'Quick separation from role',
-    duration: '8 min',
+    duration: '3 min',
     icon: 'psychology',
     route: '/return/exercise-identity-light',
     workload: ['light'],
