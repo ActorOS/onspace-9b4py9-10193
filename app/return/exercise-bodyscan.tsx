@@ -356,7 +356,7 @@ export default function BodyScanExerciseScreen() {
               <MaterialIcons name="self-improvement" size={64} color={colors.accent} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Body Scan</Text>
               <Text style={styles.welcomeText}>
-                A 12-minute guided journey through your body to release character tension and return to yourself.
+                Guided journey through your body to release character tension and return to yourself.
                 {'\n\n'}
                 Find a comfortable position—lying down or seated with support.
                 {'\n\n'}

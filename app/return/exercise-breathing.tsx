@@ -305,7 +305,7 @@ export default function BreathingExerciseScreen() {
               <MaterialIcons name="spa" size={64} color={colors.primary} style={{ marginBottom: spacing.xl }} />
               <Text style={styles.welcomeTitle}>Breathing & Release</Text>
               <Text style={styles.welcomeText}>
-                An 8-minute guided exercise to return your nervous system to baseline.
+                Guided exercise to return your nervous system to baseline.
                 {'\n\n'}
                 Find a comfortable seated position. You may close your eyes once you begin.
                 {'\n\n'}
