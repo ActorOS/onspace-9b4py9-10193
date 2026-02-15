@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -48,7 +48,8 @@ export default function InWorkScreen() {
   };
 
   const handleExitWork = () => {
-    router.push(`/check-in/post?sessionId=${sessionId}`);
+    // Route directly to Release & Return screen instead of post flow
+    router.push(`/grounding?sessionId=${sessionId}`);
   };
 
   if (isLoading || !session || !role) {
@@ -67,98 +68,19 @@ export default function InWorkScreen() {
   const durationMinutes = Math.floor(durationMs / 60000);
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <MaterialIcons name="circle" size={12} color={colors.success} />
-        <Text style={styles.headerTitle}>In Work</Text>
-        <View style={{ width: 12 }} />
-      </View>
-
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.content}>
-          
-          {/* Current Role Display */}
-          <View style={styles.roleCard}>
-            <View style={styles.roleCardHeader}>
-              <MaterialIcons name="person-outline" size={32} color={colors.primary} />
-            </View>
-            <Text style={styles.roleTitle}>{role.characterName}</Text>
-            <Text style={styles.roleSubtitle}>{role.production}</Text>
-            {session.sessionType && (
-              <View style={styles.sessionTypeBadge}>
-                <Text style={styles.sessionTypeBadgeText}>{session.sessionType}</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Session Info */}
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <MaterialIcons name="access-time" size={20} color={colors.textSecondary} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Time in work</Text>
-                <Text style={styles.infoValue}>
-                  {durationMinutes < 60 
-                    ? `${durationMinutes} minutes` 
-                    : `${Math.floor(durationMinutes / 60)}h ${durationMinutes % 60}m`
-                  }
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.infoRow}>
-              <MaterialIcons name="login" size={20} color={colors.textSecondary} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Entered at</Text>
-                <Text style={styles.infoValue}>
-                  {entryTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
-              </View>
-            </View>
-
-            {session.entryBoundaryNote && (
-              <View style={[styles.infoRow, styles.boundaryNote]}>
-                <MaterialIcons name="shield" size={20} color={colors.primary} />
-                <View style={styles.infoTextContainer}>
-                  <Text style={styles.infoLabel}>Your boundary</Text>
-                  <Text style={styles.boundaryText}>{session.entryBoundaryNote}</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          {/* Reminder Card */}
-          <View style={styles.reminderCard}>
-            <MaterialIcons name="info-outline" size={24} color={colors.accent} />
-            <Text style={styles.reminderText}>
-              You are holding this character. When you are ready to release, exit work below.
-            </Text>
-          </View>
-
-          {/* Quick Notes Section (Placeholder for future) */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Session Notes</Text>
-            <View style={styles.placeholderCard}>
-              <Text style={styles.placeholderText}>
-                Notes and observations will be available here
-              </Text>
-            </View>
-          </View>
-
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.content}>
+        <View style={styles.statusIndicator}>
+          <MaterialIcons name="circle" size={16} color={colors.success} />
         </View>
-      </ScrollView>
 
-      {/* Footer */}
-      <View style={styles.footer}>
+        <Text style={styles.title}>In Work</Text>
+        <Text style={styles.subtitle}>Session active</Text>
+
         <Pressable
           style={styles.exitButton}
           onPress={handleExitWork}
         >
-          <MaterialIcons name="logout" size={20} color={colors.background} />
           <Text style={styles.exitButtonText}>Exit Work</Text>
         </Pressable>
       </View>
@@ -169,27 +91,13 @@ export default function InWorkScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: typography.sizes.lg,
-    fontWeight: typography.weights.semibold,
-    color: colors.textPrimary,
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: '#C5B8A8', // Slightly darker than normal background for containment
   },
   content: {
-    padding: spacing.lg,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
   },
   loadingState: {
     flex: 1,
@@ -200,135 +108,24 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     color: colors.textSecondary,
   },
-  roleCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.lg,
+  statusIndicator: {
+    marginBottom: spacing.xl,
   },
-  roleCardHeader: {
-    marginBottom: spacing.md,
-  },
-  roleTitle: {
+  title: {
     fontSize: typography.sizes.xxl,
-    fontWeight: typography.weights.semibold,
+    fontWeight: typography.weights.bold,
     color: colors.textPrimary,
-    textAlign: 'center',
     marginBottom: spacing.xs,
     letterSpacing: 0,
   },
-  roleSubtitle: {
+  subtitle: {
     fontSize: typography.sizes.md,
     color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  sessionTypeBadge: {
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
-  },
-  sessionTypeBadgeText: {
-    fontSize: typography.sizes.sm,
-    color: colors.primary,
-    fontWeight: typography.weights.semibold,
-  },
-  infoCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.lg,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  boundaryNote: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    marginTop: spacing.sm,
-  },
-  infoTextContainer: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: typography.sizes.xs,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs / 2,
-  },
-  infoValue: {
-    fontSize: typography.sizes.md,
-    color: colors.textPrimary,
-    fontWeight: typography.weights.semibold,
-  },
-  boundaryText: {
-    fontSize: typography.sizes.md,
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
-  reminderCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.xl,
-  },
-  reminderText: {
-    flex: 1,
-    fontSize: typography.sizes.sm,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: spacing.md,
-  },
-  placeholderCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  placeholderText: {
-    fontSize: typography.sizes.sm,
-    color: colors.textTertiary,
-    textAlign: 'center',
-  },
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    marginBottom: spacing.xl * 2,
   },
   exitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
     backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xl * 2,
     paddingVertical: spacing.lg,
     borderRadius: borderRadius.lg,
   },

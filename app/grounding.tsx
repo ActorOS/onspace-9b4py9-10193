@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
@@ -12,6 +12,8 @@ import { UpgradePrompt } from '@/components';
 
 export default function GroundingScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const sessionId = params.sessionId as string | undefined;
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
@@ -34,19 +36,24 @@ export default function GroundingScreen() {
 
   const handleReturned = async () => {
     try {
-      // Get the active work session
-      const activeSession = await sessionStorage.getActiveSession();
+      // Get the work session (from parameter or active session)
+      let workSession = null;
+      if (sessionId) {
+        workSession = await sessionStorage.getSessionById(sessionId);
+      } else {
+        workSession = await sessionStorage.getActiveSession();
+      }
       
-      if (activeSession) {
-        // Complete the active work session
-        await sessionStorage.updateSession(activeSession.id, {
+      if (workSession) {
+        // Complete the work session
+        await sessionStorage.updateSession(workSession.id, {
           exitedAt: new Date().toISOString(),
           returnCompletedAt: new Date().toISOString(),
         });
       }
 
       // Log the return session
-      const roleId = activeSession?.roleId || await returnSessionStorage.getActiveRoleId();
+      const roleId = workSession?.roleId || await returnSessionStorage.getActiveRoleId();
       await returnSessionStorage.saveReturnSession({
         createdAt: new Date().toISOString(),
         roleId,
