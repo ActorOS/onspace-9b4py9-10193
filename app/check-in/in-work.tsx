@@ -47,9 +47,25 @@ export default function InWorkScreen() {
     }
   };
 
-  const handleExitWork = () => {
-    // Route directly to Release & Return screen instead of post flow
-    router.push(`/grounding?sessionId=${sessionId}`);
+  const handleExitWork = async () => {
+    if (!sessionId) return;
+
+    try {
+      // Mark session as exited
+      await sessionStorage.updateSession(sessionId, {
+        exitedAt: new Date().toISOString(),
+      });
+
+      // Route to post-work release recommendation screen
+      router.replace({
+        pathname: '/check-in/post-work-release',
+        params: { sessionId },
+      });
+    } catch (error) {
+      console.error('Failed to exit work:', error);
+      // Fallback to home if something goes wrong
+      router.replace('/(tabs)');
+    }
   };
 
   if (isLoading || !session || !role) {
