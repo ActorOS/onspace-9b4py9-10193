@@ -56,9 +56,9 @@ export default function InWorkScreen() {
         exitedAt: new Date().toISOString(),
       });
 
-      // Route to post-work release recommendation screen
+      // Route to category selection screen
       router.replace({
-        pathname: '/check-in/post-work-release',
+        pathname: '/check-in/return-choice',
         params: { sessionId },
       });
     } catch (error) {
