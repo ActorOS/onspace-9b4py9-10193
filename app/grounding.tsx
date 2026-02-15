@@ -141,6 +141,22 @@ export default function GroundingScreen() {
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
+
+            <Pressable 
+              style={styles.exerciseCard}
+              onPress={() => handleExercisePress('/return/exercise-intimacy', false)}
+            >
+              <View style={styles.exerciseIcon}>
+                <MaterialIcons name="spa" size={28} color={colors.primary} />
+              </View>
+              <View style={styles.exerciseContent}>
+                <Text style={styles.exerciseTitle}>Intimacy Decompression</Text>
+                <Text style={styles.exerciseDescription}>
+                  Release after physical or intimate work
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </Pressable>
           </View>
 
           {/* Quick Return */}
