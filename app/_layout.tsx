@@ -196,6 +196,10 @@ export default function RootLayout() {
           name="release-stack/edit" 
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen 
+          name="intimacy-framework" 
+          options={{ presentation: 'modal' }}
+        />
       </Stack>
     </SafeAreaProvider>
   );
