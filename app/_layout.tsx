@@ -172,6 +172,30 @@ export default function RootLayout() {
           name="somatic/play-track" 
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen 
+          name="release-stack/list" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="release-stack/select-exercises" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="release-stack/reorder" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="release-stack/name" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="release-stack/play" 
+          options={{ presentation: 'fullScreenModal' }}
+        />
+        <Stack.Screen 
+          name="release-stack/edit" 
+          options={{ presentation: 'modal' }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

@@ -194,6 +194,18 @@ export default function HomeScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
           </Pressable>
+
+          <Pressable 
+            style={styles.actionButton}
+            onPress={() => router.push('/release-stack/list')}
+          >
+            <MaterialIcons name="layers" size={24} color={colors.primary} />
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.actionTitle}>My Release Stack</Text>
+              <Text style={styles.actionSubtext}>Custom recovery flows</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+          </Pressable>
         </View>
 
         {/* Recent Work */}
