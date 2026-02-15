@@ -42,6 +42,14 @@ const SOMATIC_RELEASE_EXERCISES: ExerciseOption[] = [
     requiresPro: true,
   },
   {
+    id: 'intimacy',
+    title: 'Intimacy Decompression',
+    purpose: 'Release after physical or intimate work',
+    icon: 'spa',
+    route: '/return/exercise-intimacy',
+    requiresPro: false,
+  },
+  {
     id: 'bodyscan',
     title: 'Body Scan',
     purpose: 'Release character tension',

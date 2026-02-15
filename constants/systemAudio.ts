@@ -137,6 +137,23 @@ export const systemVoiceAudio = {
     reclaim: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_09_reclaiming+self.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/recovery/segment_10_close%20.mp3',
   },
+
+  /**
+   * Intimacy Decompression Exercise
+   * Somatic release for post-intimacy/physical work
+   */
+  exerciseIntimacy: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_01_arrival.mp3',
+    stabilise: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_02_stabilise.mp3',
+    skinBoundary: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_03_skin+boundary.mp3',
+    contactRelease: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_04_contact+release.mp3',
+    spaceReset: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_05_space+reset.mp3',
+    inhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_06_inhale.mp3',
+    exhale: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_07_exhale.mp3',
+    postureReturn: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_08_posture+return.mp3',
+    identityReclaim: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_09_identity+reclaim.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_10_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
