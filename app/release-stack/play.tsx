@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { releaseStackStorage, type ReleaseStack } from '@/services/releaseStackStorage';
@@ -15,7 +16,9 @@ export default function PlayStackScreen() {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [isInExercise, setIsInExercise] = useState(false);
   const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stackIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     loadStack();
@@ -62,48 +65,61 @@ export default function PlayStackScreen() {
     return Math.round(total + pauseTime);
   };
 
+  // Listen for when user returns from an exercise
+  useFocusEffect(
+    useCallback(() => {
+      // If we're in the middle of a stack and returning from an exercise
+      if (hasStarted && isInExercise && !isComplete) {
+        setIsInExercise(false);
+        playNextExercise();
+      }
+    }, [hasStarted, isInExercise, isComplete])
+  );
+
   const handleBegin = () => {
     setHasStarted(true);
-    startExerciseSequence();
+    setCurrentExerciseIndex(0);
+    // Start first exercise
+    playExercise(0);
   };
 
-  const startExerciseSequence = async () => {
-    if (!stack) return;
-
-    for (let i = 0; i < stack.exercises.length; i++) {
-      setCurrentExerciseIndex(i);
-      const exercise = stack.exercises[i];
-
-      // Navigate to exercise screen and wait for completion
-      // Note: In a real implementation, you'd need to modify exercise screens
-      // to support programmatic completion callbacks
-      router.push(exercise.route);
-
-      // Wait for user to complete exercise and return
-      // This is a simplified version - real implementation would need
-      // proper navigation state management
-      await new Promise(resolve => {
-        const checkInterval = setInterval(() => {
-          // Check if user has returned from exercise
-          // This would need proper implementation with navigation events
-          clearInterval(checkInterval);
-          resolve(undefined);
-        }, 1000);
-      });
-
-      // Add pause between exercises if enabled
-      if (stack.addPausesBetween && i < stack.exercises.length - 1) {
-        setIsPaused(true);
-        await new Promise(resolve => {
-          pauseTimerRef.current = setTimeout(() => {
-            setIsPaused(false);
-            resolve(undefined);
-          }, 10000);
-        });
-      }
+  const playExercise = (index: number) => {
+    if (!stack || index >= stack.exercises.length) {
+      setIsComplete(true);
+      return;
     }
 
-    setIsComplete(true);
+    const exercise = stack.exercises[index];
+    setIsInExercise(true);
+    router.push(exercise.route);
+  };
+
+  const playNextExercise = async () => {
+    if (!stack) return;
+
+    const nextIndex = currentExerciseIndex + 1;
+
+    // Check if we've completed all exercises
+    if (nextIndex >= stack.exercises.length) {
+      setIsComplete(true);
+      return;
+    }
+
+    // Add pause between exercises if enabled
+    if (stack.addPausesBetween) {
+      setIsPaused(true);
+      await new Promise(resolve => {
+        pauseTimerRef.current = setTimeout(() => {
+          setIsPaused(false);
+          setCurrentExerciseIndex(nextIndex);
+          playExercise(nextIndex);
+          resolve(undefined);
+        }, 10000);
+      });
+    } else {
+      setCurrentExerciseIndex(nextIndex);
+      playExercise(nextIndex);
+    }
   };
 
   const handleComplete = () => {
@@ -190,19 +206,26 @@ export default function PlayStackScreen() {
             <Text style={styles.pauseText}>
               Take 10 seconds to notice where you are
             </Text>
+            <Text style={styles.nextExerciseText}>
+              Next: {stack.exercises[currentExerciseIndex + 1]?.name}
+            </Text>
           </View>
-        ) : (
+        ) : isInExercise ? (
           <View style={styles.progressContainer}>
             <View style={styles.progressInfo}>
+              <ActivityIndicator size="large" color={colors.primary} style={{ marginBottom: spacing.lg }} />
               <Text style={styles.progressText}>
                 Exercise {currentExerciseIndex + 1} of {stack.exercises.length}
               </Text>
               <Text style={styles.currentExercise}>
                 {stack.exercises[currentExerciseIndex]?.name}
               </Text>
+              <Text style={styles.inProgressText}>
+                Complete the exercise to continue your stack
+              </Text>
             </View>
           </View>
-        )}
+        ) : null}
       </View>
 
       <View style={styles.footer}>
@@ -365,6 +388,12 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     color: colors.textSecondary,
     textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  nextExerciseText: {
+    fontSize: typography.sizes.sm,
+    color: colors.textTertiary,
+    textAlign: 'center',
   },
   progressContainer: {
     flex: 1,
@@ -384,6 +413,13 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.semibold,
     color: colors.textPrimary,
     textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  inProgressText: {
+    fontSize: typography.sizes.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: spacing.xl,
   },
   footer: {
     paddingHorizontal: spacing.lg,
