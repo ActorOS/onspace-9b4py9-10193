@@ -2,24 +2,29 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 
 export default function QuickMovementScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const isStackMode = params.stackMode === 'true';
 
   const handleDone = async () => {
     try {
-      const roleId = await returnSessionStorage.getActiveRoleId();
-      await returnSessionStorage.saveReturnSession({
-        createdAt: new Date().toISOString(),
-        roleId,
-        source: 'release_return',
-        completed: true,
-        completionType: 'quick',
-        notes: 'Quick return: Movement',
-      });
+      // Only save return session if not in stack mode
+      if (!isStackMode) {
+        const roleId = await returnSessionStorage.getActiveRoleId();
+        await returnSessionStorage.saveReturnSession({
+          createdAt: new Date().toISOString(),
+          roleId,
+          source: 'release_return',
+          completed: true,
+          completionType: 'quick',
+          notes: 'Quick return: Movement',
+        });
+      }
       router.back();
     } catch (error) {
       console.error('Failed to log return session:', error);

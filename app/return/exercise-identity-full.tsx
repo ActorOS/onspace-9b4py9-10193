@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
@@ -36,6 +36,8 @@ type IdentityFullStep =
 
 export default function IdentitySeparationFullScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const isStackMode = params.stackMode === 'true';
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
@@ -288,17 +290,23 @@ export default function IdentitySeparationFullScreen() {
         completionAt: new Date().toISOString(),
       });
       
-      const roleId = await returnSessionStorage.getActiveRoleId();
-      await returnSessionStorage.saveReturnSession({
-        createdAt: new Date().toISOString(),
-        roleId,
-        source: 'release_return',
-        completed: true,
-        completionType: 'exercise',
-        notes: 'Identity Separation (Full Release) exercise completed',
-      });
+      if (!isStackMode) {
+        const roleId = await returnSessionStorage.getActiveRoleId();
+        await returnSessionStorage.saveReturnSession({
+          createdAt: new Date().toISOString(),
+          roleId,
+          source: 'release_return',
+          completed: true,
+          completionType: 'exercise',
+          notes: 'Identity Separation (Full Release) exercise completed',
+        });
+      }
       
-      router.replace('/(tabs)');
+      if (isStackMode) {
+        router.back();
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
       Alert.alert('Error', 'Failed to complete exercise');

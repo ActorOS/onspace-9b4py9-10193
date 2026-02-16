@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
@@ -28,6 +28,8 @@ type ScanStep =
 
 export default function BodyScanExerciseScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<ScanStep>('arrival');
@@ -215,17 +217,25 @@ export default function BodyScanExerciseScreen() {
         completionAt: new Date().toISOString(),
       });
       
-      const roleId = await returnSessionStorage.getActiveRoleId();
-      await returnSessionStorage.saveReturnSession({
-        createdAt: new Date().toISOString(),
-        roleId,
-        source: 'release_return',
-        completed: true,
-        completionType: 'exercise',
-        notes: 'Body Scan exercise completed',
-      });
+      // Only save return session if not in stack mode
+      if (!isStackMode) {
+        const roleId = await returnSessionStorage.getActiveRoleId();
+        await returnSessionStorage.saveReturnSession({
+          createdAt: new Date().toISOString(),
+          roleId,
+          source: 'release_return',
+          completed: true,
+          completionType: 'exercise',
+          notes: 'Body Scan exercise completed',
+        });
+      }
       
-      router.replace('/(tabs)');
+      // If in stack mode, go back to play screen; otherwise go home
+      if (isStackMode) {
+        router.back();
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
       Alert.alert('Error', 'Failed to complete exercise');

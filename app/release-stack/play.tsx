@@ -91,7 +91,8 @@ export default function PlayStackScreen() {
 
     const exercise = stack.exercises[index];
     setIsInExercise(true);
-    router.push(exercise.route);
+    // Pass stackMode parameter to exercise so it knows to return here instead of home
+    router.push(`${exercise.route}?stackMode=true` as any);
   };
 
   const playNextExercise = async () => {
