@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -377,27 +378,6 @@ export default function SettingsScreen() {
               </View>
             </Pressable>
           )}
-        </View>
-
-        {/* Communications */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Communications</Text>
-          
-          <Pressable 
-            style={styles.settingCard}
-            onPress={() => router.push('/email-updates')}
-          >
-            <View style={styles.settingRow}>
-              <MaterialIcons name="mail-outline" size={20} color={colors.textSecondary} />
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Email Updates</Text>
-                <Text style={styles.settingDescription}>
-                  Subscribe to pilot updates and releases
-                </Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
-            </View>
-          </Pressable>
         </View>
 
         {/* Data Management */}
