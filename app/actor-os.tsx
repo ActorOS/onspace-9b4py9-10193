@@ -95,19 +95,11 @@ export default function ActorOSScreen() {
         await sound.unloadAsync();
       }
       
-      // Check if user is authenticated
-      const supabase = getSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
       
-      // Navigate to email updates if authenticated, otherwise go to tabs
-      if (user) {
-        router.replace('/email-updates?source=onboarding');
-      } else {
-        router.replace('/(tabs)');
-      }
+      // Navigate to email updates (authenticated users only reach onboarding)
+      router.replace('/email-updates?source=onboarding');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       // Still navigate even if storage fails

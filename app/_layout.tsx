@@ -8,6 +8,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="auth-gate" />
         <Stack.Screen name="actor-os" />
         <Stack.Screen name="biometric-lock" />
         <Stack.Screen 
@@ -162,6 +163,10 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="settings/delete-data" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="settings/account" 
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 

@@ -379,6 +379,27 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Account */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          
+          <Pressable 
+            style={styles.settingCard}
+            onPress={() => router.push('/settings/account')}
+          >
+            <View style={styles.settingRow}>
+              <MaterialIcons name="person-outline" size={20} color={colors.textSecondary} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Account</Text>
+                <Text style={styles.settingDescription}>
+                  Email and sign out
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </View>
+          </Pressable>
+        </View>
+
         {/* Communications */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Communications</Text>
