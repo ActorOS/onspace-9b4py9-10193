@@ -1,56 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getSupabaseClient } from '@/template';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
+import { biometricLockStorage } from '@/services/biometricLockStorage';
 import { colors } from '@/constants/theme';
 
 export default function IndexScreen() {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    checkAuthAndRoute();
+    checkAppStatus();
   }, []);
 
-  const checkAuthAndRoute = async () => {
+  const checkAppStatus = async () => {
     try {
-      // Check Supabase session first
-      const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      // No session → Auth Gate
-      if (!session) {
-        router.replace('/auth-gate');
+      // Check onboarding status
+      const hasCompleted = await userSettingsStorage.hasCompletedOnboarding();
+      
+      if (!hasCompleted) {
+        // Show onboarding first
+        router.replace('/actor-os');
         return;
       }
 
-      // Has session → Check onboarding status
-      const settings = await userSettingsStorage.getSettings();
+      // Check if biometric lock is enabled
+      const biometricEnabled = await biometricLockStorage.isEnabled();
       
-      if (!settings.onboardingCompleted) {
-        // First time user → Onboarding
-        router.replace('/actor-os');
+      if (biometricEnabled) {
+        // Require biometric authentication
+        router.replace('/biometric-lock');
       } else {
-        // Returning user → Home
+        // Go directly to home
         router.replace('/(tabs)');
       }
     } catch (error) {
-      console.error('Failed to check auth status:', error);
-      // On error, assume no auth and show auth gate
-      router.replace('/auth-gate');
-    } finally {
-      setIsChecking(false);
+      console.error('Failed to check app status:', error);
+      // Default to showing onboarding on error
+      router.replace('/actor-os');
     }
   };
 
-  if (isChecking) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
-  return null;
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
