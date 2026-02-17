@@ -10,6 +10,10 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="actor-os" />
         <Stack.Screen name="biometric-lock" />
+        <Stack.Screen 
+          name="email-updates" 
+          options={{ presentation: 'modal' }}
+        />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="role/[id]" />
         <Stack.Screen 

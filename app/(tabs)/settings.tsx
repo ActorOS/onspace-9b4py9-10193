@@ -379,6 +379,27 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Communications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Communications</Text>
+          
+          <Pressable 
+            style={styles.settingCard}
+            onPress={() => router.push('/email-updates?source=settings')}
+          >
+            <View style={styles.settingRow}>
+              <MaterialIcons name="mail-outline" size={20} color={colors.textSecondary} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Email Updates</Text>
+                <Text style={styles.settingDescription}>
+                  Subscribe to pilot updates and releases
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </View>
+          </Pressable>
+        </View>
+
         {/* Data Management */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data management</Text>

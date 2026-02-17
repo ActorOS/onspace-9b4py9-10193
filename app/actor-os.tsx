@@ -8,6 +8,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, Eas
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { getSupabaseClient } from '@/template';
 
 export default function ActorOSScreen() {
   const router = useRouter();
@@ -94,10 +95,19 @@ export default function ActorOSScreen() {
         await sound.unloadAsync();
       }
       
+      // Check if user is authenticated
+      const supabase = getSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
-      // Navigate to home and prevent back navigation
-      router.replace('/(tabs)');
+      
+      // Navigate to email updates if authenticated, otherwise go to tabs
+      if (user) {
+        router.replace('/email-updates?source=onboarding');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       // Still navigate even if storage fails
