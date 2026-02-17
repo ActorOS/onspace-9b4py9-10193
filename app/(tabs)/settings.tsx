@@ -385,7 +385,7 @@ export default function SettingsScreen() {
           
           <Pressable 
             style={styles.settingCard}
-            onPress={() => router.push('/email-updates?source=settings')}
+            onPress={() => router.push('/email-updates')}
           >
             <View style={styles.settingRow}>
               <MaterialIcons name="mail-outline" size={20} color={colors.textSecondary} />

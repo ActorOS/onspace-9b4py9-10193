@@ -19,6 +19,7 @@ export interface UserSettings {
   voiceVolume: number; // 0–100
   dataExportFormat: DataExportFormat;
   showAuditionMetrics: boolean; // Show/hide numerical metrics in Audition Aftermath
+  emailSubscribed: boolean; // Track if user has subscribed to email updates
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -34,6 +35,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   voiceVolume: 75,
   dataExportFormat: 'json',
   showAuditionMetrics: true, // Default: metrics visible
+  emailSubscribed: false,
 };
 
 class UserSettingsStorage {
@@ -99,6 +101,20 @@ class UserSettingsStorage {
 
   async resetOnboarding(): Promise<void> {
     await this.updateSetting('hasCompletedOnboarding', false);
+  }
+
+  async markEmailSubscribed(): Promise<void> {
+    await this.updateSetting('emailSubscribed', true);
+  }
+
+  async isEmailSubscribed(): Promise<boolean> {
+    try {
+      const settings = await this.getSettings();
+      return settings.emailSubscribed;
+    } catch (error) {
+      console.error('Failed to check email subscription status:', error);
+      return false;
+    }
   }
 }
 

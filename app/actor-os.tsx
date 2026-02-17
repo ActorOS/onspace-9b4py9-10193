@@ -95,16 +95,19 @@ export default function ActorOSScreen() {
         await sound.unloadAsync();
       }
       
+      // Mark onboarding as completed
+      await userSettingsStorage.completeOnboarding();
+      
       // Check if user is authenticated
       const supabase = getSupabaseClient();
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Mark onboarding as completed
-      await userSettingsStorage.completeOnboarding();
+      // Check if user has already subscribed to email updates
+      const isSubscribed = await userSettingsStorage.isEmailSubscribed();
       
-      // Navigate to email updates if authenticated, otherwise go to tabs
-      if (user) {
-        router.replace('/email-updates?source=onboarding');
+      // Navigate to email updates if authenticated AND not already subscribed
+      if (user && !isSubscribed) {
+        router.replace('/email-updates?source=post_onboarding');
       } else {
         router.replace('/(tabs)');
       }

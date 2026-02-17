@@ -5,12 +5,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { getSupabaseClient } from '@/template';
+import { userSettingsStorage } from '@/services/userSettingsStorage';
 
 export default function EmailUpdatesScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const source = (params.source as string) || 'settings';
-  const isOnboarding = source === 'onboarding';
+  const isPostOnboarding = source === 'post_onboarding';
   
   const [email, setEmail] = useState('');
   const [consented, setConsented] = useState(false);
@@ -75,7 +76,7 @@ export default function EmailUpdatesScreen() {
       // Call RPC function
       const { data, error } = await supabase.rpc('subscribe_marketing', {
         p_email: email.trim().toLowerCase(),
-        p_source: source,
+        p_source: isPostOnboarding ? 'post_onboarding' : source,
         p_tags: ['updates']
       });
 
@@ -91,12 +92,8 @@ export default function EmailUpdatesScreen() {
         if (data.success) {
           setIsSubscribed(true);
           
-          if (isOnboarding) {
-            // Show success briefly, then continue
-            setTimeout(() => {
-              handleContinue();
-            }, 1500);
-          }
+          // Mark as subscribed in local storage
+          await userSettingsStorage.markEmailSubscribed();
         } else {
           Alert.alert('Error', data.error || 'Could not subscribe right now. Please try again.');
         }
@@ -112,8 +109,8 @@ export default function EmailUpdatesScreen() {
   };
 
   const handleSkip = () => {
-    if (isOnboarding) {
-      handleContinue();
+    if (isPostOnboarding) {
+      router.replace('/(tabs)');
     } else {
       router.back();
     }
@@ -126,15 +123,15 @@ export default function EmailUpdatesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        {!isOnboarding && (
+        {!isPostOnboarding && source !== 'onboarding' && (
           <Pressable onPress={() => router.back()} style={styles.headerButton}>
             <MaterialIcons name="close" size={24} color={colors.textPrimary} />
           </Pressable>
         )}
         <Text style={styles.headerTitle}>
-          {isOnboarding ? 'Stay in the loop' : 'Email Updates'}
+          {isPostOnboarding ? 'ActorOS Updates' : 'Email Updates'}
         </Text>
-        {!isOnboarding && <View style={styles.headerButton} />}
+        {!isPostOnboarding && source !== 'onboarding' && <View style={styles.headerButton} />}
       </View>
 
       <View style={styles.content}>
@@ -145,7 +142,9 @@ export default function EmailUpdatesScreen() {
             </View>
 
             <Text style={styles.bodyText}>
-              Get ActorOS pilot updates, feature releases, and event invites. Optional.
+              {isPostOnboarding 
+                ? 'Receive ActorOS updates, new protocol releases, and curated event invitations. Optional.'
+                : 'Get ActorOS pilot updates, feature releases, and event invites. Optional.'}
             </Text>
 
             <View style={styles.formContainer}>
@@ -180,7 +179,7 @@ export default function EmailUpdatesScreen() {
         ) : (
           <View style={styles.successContainer}>
             <MaterialIcons name="check-circle" size={80} color={colors.accent} />
-            <Text style={styles.successTitle}>You're subscribed</Text>
+            <Text style={styles.successTitle}>Subscribed.</Text>
             <Text style={styles.successText}>
               You'll receive ActorOS updates at {email}
             </Text>
@@ -203,7 +202,7 @@ export default function EmailUpdatesScreen() {
               )}
             </Pressable>
 
-            {isOnboarding && (
+            {isPostOnboarding && (
               <Pressable 
                 style={styles.secondaryButton} 
                 onPress={handleSkip}
@@ -214,11 +213,11 @@ export default function EmailUpdatesScreen() {
             )}
           </>
         ) : (
-          !isOnboarding && (
-            <Pressable style={styles.primaryButton} onPress={() => router.back()}>
-              <Text style={styles.primaryButtonText}>Done</Text>
-            </Pressable>
-          )
+          <Pressable style={styles.primaryButton} onPress={handleContinue}>
+            <Text style={styles.primaryButtonText}>
+              {isPostOnboarding ? 'Continue to ActorOS' : 'Done'}
+            </Text>
+          </Pressable>
         )}
       </View>
     </SafeAreaView>
