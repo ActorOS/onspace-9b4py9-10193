@@ -9,6 +9,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="actor-os" />
+        <Stack.Screen name="login" />
         <Stack.Screen name="biometric-lock" />
         <Stack.Screen 
           name="email-updates" 

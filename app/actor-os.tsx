@@ -98,23 +98,12 @@ export default function ActorOSScreen() {
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
       
-      // Check if user is authenticated
-      const supabase = getSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Check if user has already subscribed to email updates
-      const isSubscribed = await userSettingsStorage.isEmailSubscribed();
-      
-      // Navigate to email updates if authenticated AND not already subscribed
-      if (user && !isSubscribed) {
-        router.replace('/email-updates?source=post_onboarding');
-      } else {
-        router.replace('/(tabs)');
-      }
+      // Route to login screen
+      router.replace('/login');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       // Still navigate even if storage fails
-      router.replace('/(tabs)');
+      router.replace('/login');
     }
   };
 
