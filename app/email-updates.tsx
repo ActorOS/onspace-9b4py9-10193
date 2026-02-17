@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -17,6 +17,8 @@ export default function EmailUpdatesScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showTestMode, setShowTestMode] = useState(false);
+  const [testResult, setTestResult] = useState<string>('');
 
   useEffect(() => {
     loadUserEmail();
@@ -134,10 +136,56 @@ export default function EmailUpdatesScreen() {
         <Text style={styles.headerTitle}>
           {isOnboarding ? 'Stay in the loop' : 'Email Updates'}
         </Text>
-        {!isOnboarding && <View style={styles.headerButton} />}
+        {!isOnboarding && (
+          <Pressable onPress={() => setShowTestMode(!showTestMode)} style={styles.headerButton}>
+            <MaterialIcons 
+              name={showTestMode ? "bug-report" : "bug-report"} 
+              size={24} 
+              color={showTestMode ? colors.accent : colors.textTertiary} 
+            />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.content}>
+        {showTestMode && (
+          <View style={styles.testCard}>
+            <View style={styles.testHeader}>
+              <MaterialIcons name="bug-report" size={20} color={colors.accent} />
+              <Text style={styles.testTitle}>Test Mode</Text>
+            </View>
+            
+            <Pressable 
+              style={styles.testButton}
+              onPress={async () => {
+                setTestResult('Testing...');
+                try {
+                  const supabase = getSupabaseClient();
+                  const { data: { user } } = await supabase.auth.getUser();
+                  
+                  if (!user) {
+                    setTestResult('❌ No authenticated user');
+                    return;
+                  }
+                  
+                  setTestResult(`✅ User: ${user.email}\n📧 Email: ${email || 'not set'}\n🔑 User ID: ${user.id.slice(0, 8)}...`);
+                } catch (error) {
+                  setTestResult(`❌ Error: ${error}`);
+                }
+              }}
+            >
+              <MaterialIcons name="play-arrow" size={16} color={colors.primary} />
+              <Text style={styles.testButtonText}>Test Auth Status</Text>
+            </Pressable>
+            
+            {testResult ? (
+              <View style={styles.testResultBox}>
+                <Text style={styles.testResultText}>{testResult}</Text>
+              </View>
+            ) : null}
+          </View>
+        )}
+
         {!isSubscribed ? (
           <>
             <View style={styles.iconContainer}>
@@ -363,5 +411,56 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  testCard: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  testHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  testTitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+    color: colors.accent,
+    textTransform: 'uppercase',
+  },
+  testButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  testButtonText: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    color: colors.primary,
+  },
+  testResultBox: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.surface,
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  testResultText: {
+    fontSize: typography.sizes.xs,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
 });
