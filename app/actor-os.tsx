@@ -98,12 +98,12 @@ export default function ActorOSScreen() {
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
       
-      // Route to login screen
-      router.replace('/login');
+      // Route to stay connected screen
+      router.replace('/stay-connected');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       // Still navigate even if storage fails
-      router.replace('/login');
+      router.replace('/stay-connected');
     }
   };
 

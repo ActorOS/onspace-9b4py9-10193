@@ -24,17 +24,7 @@ export default function EmailUpdatesScreen() {
   }, []);
 
   const loadUserEmail = async () => {
-    try {
-      const supabase = getSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user?.email) {
-        setUserEmail(user.email);
-        setEmail(user.email);
-      }
-    } catch (error) {
-      console.error('Failed to load user email:', error);
-    }
+    // No auth required - email updates are optional
   };
 
   const validateEmail = (emailInput: string): boolean => {
@@ -63,22 +53,23 @@ export default function EmailUpdatesScreen() {
     setIsLoading(true);
 
     try {
-      const supabase = getSupabaseClient();
-      
-      // Check authentication
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        Alert.alert('Authentication Required', 'Please log in to subscribe to email updates.');
-        setIsLoading(false);
-        return;
-      }
+      // This feature is deprecated in favor of the lightweight stay-connected flow
+      // Kept for settings access only
+      Alert.alert(
+        'Feature Unavailable',
+        'Email updates are now managed through the Stay Connected screen during onboarding.'
+      );
+      setIsLoading(false);
+      return;
 
-      // Call RPC function
+      /* Deprecated subscription flow
+      const supabase = getSupabaseClient();
       const { data, error } = await supabase.rpc('subscribe_marketing', {
         p_email: email.trim().toLowerCase(),
         p_source: isPostOnboarding ? 'post_onboarding' : source,
         p_tags: ['updates']
       });
+      */
 
       if (error) {
         console.error('Subscription error:', error);
