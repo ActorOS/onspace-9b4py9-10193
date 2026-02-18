@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -91,7 +92,7 @@ export default function FullBodyRecoveryStandardScreen() {
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
+        staysActiveInBackground: true,
         shouldDuckAndroid: true,
       });
 
@@ -239,12 +240,15 @@ export default function FullBodyRecoveryStandardScreen() {
     }
   };
 
-  const handleBegin = () => {
+  const handleBegin = async () => {
     setHasStarted(true);
+    await activateKeepAwakeAsync();
     runRecoveryStandardSequence();
   };
 
   const handleComplete = async () => {
+    deactivateKeepAwake();
+    
     if (!sessionId) return;
     
     try {
@@ -277,6 +281,8 @@ export default function FullBodyRecoveryStandardScreen() {
   };
 
   const handleExit = () => {
+    deactivateKeepAwake();
+    
     if (soundRef.current) {
       soundRef.current.stopAsync();
     }

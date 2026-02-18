@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, Easing, withSequence } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -89,6 +90,9 @@ export default function PlaySomaticTrackScreen() {
     setIsPlaying(true);
     setCurrentIndex(0);
     
+    // Keep screen awake during exercise
+    await activateKeepAwakeAsync();
+    
     // Use voice-led sequence for Breath Settling
     if (trackType === 'breath_settling') {
       runBreathSettlingSequence();
@@ -142,7 +146,7 @@ export default function PlaySomaticTrackScreen() {
     try {
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
+        staysActiveInBackground: true,
         shouldDuckAndroid: true,
       });
 
@@ -277,6 +281,9 @@ export default function PlaySomaticTrackScreen() {
   };
 
   const handleExit = async () => {
+    // Allow screen to sleep again
+    deactivateKeepAwake();
+    
     Speech.stop();
     if (soundRef.current) {
       soundRef.current.stopAsync();
@@ -301,6 +308,9 @@ export default function PlaySomaticTrackScreen() {
   };
 
   const handleComplete = async () => {
+    // Allow screen to sleep again
+    deactivateKeepAwake();
+    
     setIsPlaying(false);
     
     // Log completed usage

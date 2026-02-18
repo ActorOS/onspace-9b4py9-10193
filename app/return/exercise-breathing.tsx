@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -64,7 +65,7 @@ export default function BreathingExerciseScreen() {
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
+        staysActiveInBackground: true,
         shouldDuckAndroid: true,
       });
 
@@ -187,12 +188,17 @@ export default function BreathingExerciseScreen() {
     }
   };
 
-  const handleBegin = () => {
+  const handleBegin = async () => {
     setHasStarted(true);
+    // Keep screen awake during exercise
+    await activateKeepAwakeAsync();
     runBreathingSequence();
   };
 
   const handleComplete = async () => {
+    // Allow screen to sleep again
+    deactivateKeepAwake();
+    
     if (!sessionId) return;
     
     try {
@@ -227,6 +233,9 @@ export default function BreathingExerciseScreen() {
   };
 
   const handleExit = () => {
+    // Allow screen to sleep again
+    deactivateKeepAwake();
+    
     if (soundRef.current) {
       soundRef.current.stopAsync();
     }

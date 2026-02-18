@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -76,7 +77,7 @@ export default function GentleGroundingExerciseScreen() {
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
+        staysActiveInBackground: true,
         shouldDuckAndroid: true,
       });
 
@@ -169,12 +170,15 @@ export default function GentleGroundingExerciseScreen() {
     }
   };
 
-  const handleBegin = () => {
+  const handleBegin = async () => {
     setHasStarted(true);
+    await activateKeepAwakeAsync();
     runGroundingSequence();
   };
 
   const handleComplete = async () => {
+    deactivateKeepAwake();
+    
     if (!sessionId) return;
     
     try {
@@ -209,6 +213,8 @@ export default function GentleGroundingExerciseScreen() {
   };
 
   const handleExit = () => {
+    deactivateKeepAwake();
+    
     if (soundRef.current) {
       soundRef.current.stopAsync();
     }
