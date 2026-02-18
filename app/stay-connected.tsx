@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
-import { userTokenStorage } from '@/services/userTokenStorage';
+import { userSettingsStorage } from '@/services/userSettingsStorage';
 import { getSupabaseClient } from '@/template';
 
 export default function StayConnectedScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [consentUpdates, setConsentUpdates] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const validateEmail = (emailInput: string): boolean => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -20,55 +20,62 @@ export default function StayConnectedScreen() {
 
   const handleSkip = async () => {
     try {
-      // Generate anonymous token and store locally
-      await userTokenStorage.getOrCreateToken();
-      // Route to home
-      router.replace('/(tabs)');
+      // Mark that user has seen this screen
+      await userSettingsStorage.markEmailSubscribed();
     } catch (error) {
-      console.error('Failed to generate token:', error);
-      // Continue anyway
-      router.replace('/(tabs)');
+      console.error('Failed to save skip status:', error);
     }
+    // Route to home
+    router.replace('/(tabs)');
   };
 
   const handleContinue = async () => {
-    // Validate email if provided
-    if (email.trim() && !validateEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+    setError('');
+
+    // Validate email format
+    if (!email.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address.');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Get or create local user token
-      const userToken = await userTokenStorage.getOrCreateToken();
-
-      // Call backend Edge Function to register
       const supabase = getSupabaseClient();
-      const { data, error } = await supabase.functions.invoke('register-user', {
-        body: {
-          email: email.trim().toLowerCase() || null,
-          consent_updates: consentUpdates,
-          user_token: userToken,
-          source: 'post_onboarding'
-        }
-      });
+      
+      // Insert directly into marketing_subscribers table
+      const { error: insertError } = await supabase
+        .from('marketing_subscribers')
+        .insert({
+          email: email.trim().toLowerCase(),
+          source: 'post_onboarding',
+        });
 
-      if (error) {
-        console.error('Registration error:', error);
-        Alert.alert('Error', 'Could not connect right now. Your data is saved locally.');
-        router.replace('/(tabs)');
-        return;
+      if (insertError) {
+        // Check if duplicate email (code 23505 is unique violation in Postgres)
+        if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('unique')) {
+          // Treat duplicate as success - user already subscribed
+          console.log('Email already subscribed, continuing...');
+        } else {
+          // Other error - show inline error and allow retry
+          console.error('Subscription error:', insertError);
+          setError('Could not subscribe right now. Please try again.');
+          setIsLoading(false);
+          return;
+        }
       }
 
-      // Success - route to home
+      // Success - mark as subscribed and navigate to home
+      await userSettingsStorage.markEmailSubscribed();
       router.replace('/(tabs)');
     } catch (error) {
-      console.error('Connection failed:', error);
-      // Don't block the user - let them continue
-      Alert.alert('Notice', 'Your data is saved locally on this device.');
-      router.replace('/(tabs)');
+      console.error('Subscription failed:', error);
+      setError('Could not subscribe right now. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -81,38 +88,29 @@ export default function StayConnectedScreen() {
           <MaterialIcons name="link" size={64} color={colors.textSecondary} />
         </View>
 
-        <Text style={styles.title}>Stay Connected</Text>
+        <Text style={styles.title}>Get ActorOS updates</Text>
         <Text style={styles.bodyText}>
-          Add your email to save your progress and receive ActorOS updates. Optional.
+          Feature releases, event invites, and new recovery tools. Optional.
         </Text>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Email Address</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, error && styles.inputError]}
             value={email}
-            onChangeText={setEmail}
-            placeholder="your@email.com (optional)"
+            onChangeText={(text) => {
+              setEmail(text);
+              setError(''); // Clear error on typing
+            }}
+            placeholder="your@email.com"
             placeholderTextColor={colors.textTertiary}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isLoading}
           />
-
-          <Pressable 
-            style={styles.checkboxRow} 
-            onPress={() => !isLoading && setConsentUpdates(!consentUpdates)}
-          >
-            <View style={[styles.checkbox, consentUpdates && styles.checkboxChecked]}>
-              {consentUpdates && (
-                <MaterialIcons name="check" size={16} color={colors.background} />
-              )}
-            </View>
-            <Text style={styles.checkboxLabel}>
-              I'd like to receive updates from ActorOS.
-            </Text>
-          </Pressable>
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
         </View>
       </View>
 
@@ -134,7 +132,7 @@ export default function StayConnectedScreen() {
           onPress={handleSkip}
           disabled={isLoading}
         >
-          <Text style={styles.secondaryButtonText}>Skip</Text>
+          <Text style={styles.secondaryButtonText}>Skip for now</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -173,12 +171,7 @@ const styles = StyleSheet.create({
   formContainer: {
     width: '100%',
   },
-  label: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.medium,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
+
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -188,32 +181,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     fontSize: typography.sizes.md,
     color: colors.textPrimary,
-    marginBottom: spacing.lg,
   },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  inputError: {
+    borderColor: colors.error,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: borderRadius.sm,
-    borderWidth: 2,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  checkboxLabel: {
-    flex: 1,
+  errorText: {
     fontSize: typography.sizes.sm,
-    color: colors.textSecondary,
-    lineHeight: 20,
+    color: colors.error,
+    marginTop: spacing.xs,
   },
+
   footer: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
