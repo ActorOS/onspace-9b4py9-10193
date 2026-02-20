@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, Platform, Keyboard } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { roleStorage } from '@/services/roleStorage';
+import { DoneKeyboardAccessory } from '@/components';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -30,6 +31,8 @@ export default function RoleEntryScreen() {
   const [isOngoing, setIsOngoing] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const inputAccessoryViewID = 'roleEntryInputAccessory';
 
   const canContinueStep2 = characterName.trim() !== '' && production.trim() !== '';
 
@@ -157,6 +160,9 @@ export default function RoleEntryScreen() {
                   placeholder="Enter character name"
                   placeholderTextColor={colors.textTertiary}
                   autoFocus
+                  returnKeyType="next"
+                  inputAccessoryViewID={inputAccessoryViewID}
+                  blurOnSubmit={false}
                 />
               </View>
 
@@ -168,6 +174,9 @@ export default function RoleEntryScreen() {
                   onChangeText={setProduction}
                   placeholder="Production or project name"
                   placeholderTextColor={colors.textTertiary}
+                  returnKeyType="done"
+                  inputAccessoryViewID={inputAccessoryViewID}
+                  blurOnSubmit
                 />
                 
                 <Text style={styles.helperText}>Examples:</Text>
@@ -317,6 +326,8 @@ export default function RoleEntryScreen() {
                   multiline
                   numberOfLines={6}
                   textAlignVertical="top"
+                  inputAccessoryViewID={inputAccessoryViewID}
+                  blurOnSubmit
                 />
                 
                 <Text style={styles.helperText}>You can leave this blank if not yet known</Text>
@@ -364,6 +375,8 @@ export default function RoleEntryScreen() {
                   multiline
                   numberOfLines={6}
                   textAlignVertical="top"
+                  inputAccessoryViewID={inputAccessoryViewID}
+                  blurOnSubmit
                 />
                 
                 <View style={styles.examplesCard}>
@@ -565,6 +578,7 @@ export default function RoleEntryScreen() {
           </Pressable>
         )}
       </View>
+      <DoneKeyboardAccessory nativeID={inputAccessoryViewID} onDone={() => Keyboard.dismiss()} />
     </SafeAreaView>
   );
 }

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, ActivityIndicator, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
 import { getSupabaseClient } from '@/template';
+import { KeyboardDismissView, DoneKeyboardAccessory } from '@/components';
 
 export default function StayConnectedScreen() {
   const router = useRouter();
@@ -72,8 +73,11 @@ export default function StayConnectedScreen() {
     }
   };
 
+  const inputAccessoryViewID = 'emailInputAccessory';
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <KeyboardDismissView style={{ flex: 1 }}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
           <MaterialIcons name="link" size={64} color={colors.textSecondary} />
@@ -98,6 +102,10 @@ export default function StayConnectedScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isLoading}
+            returnKeyType="done"
+            onSubmitEditing={handleContinue}
+            inputAccessoryViewID={inputAccessoryViewID}
+            blurOnSubmit
           />
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
@@ -118,6 +126,8 @@ export default function StayConnectedScreen() {
           )}
         </Pressable>
       </View>
+      </KeyboardDismissView>
+      <DoneKeyboardAccessory nativeID={inputAccessoryViewID} onDone={() => Keyboard.dismiss()} />
     </SafeAreaView>
   );
 }

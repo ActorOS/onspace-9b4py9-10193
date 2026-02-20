@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { roleStorage, type Role } from '@/services/roleStorage';
 import { sessionStorage } from '@/services/sessionStorage';
 import { somaticExitStorage } from '@/services/somaticExitStorage';
 import { tierStorage } from '@/services/tierStorage';
-import { UpgradePrompt } from '@/components';
+import { UpgradePrompt, DoneKeyboardAccessory } from '@/components';
 
 export default function RoleWorkspaceScreen() {
   const router = useRouter();
@@ -23,6 +23,8 @@ export default function RoleWorkspaceScreen() {
   const [upgradeFeature, setUpgradeFeature] = useState({ name: '', description: '' });
   const [isPro, setIsPro] = useState(false);
   const [currentWorkloadLevel, setCurrentWorkloadLevel] = useState<'light' | 'medium' | 'heavy' | null>(null);
+
+  const inputAccessoryViewID = 'roleNotesInputAccessory';
 
   // Character notes sections state
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core']));
@@ -253,6 +255,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                   
@@ -266,6 +270,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                   
@@ -279,6 +285,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                 </View>
@@ -318,6 +326,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                   
@@ -331,6 +341,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                   
@@ -344,6 +356,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                 </View>
@@ -387,6 +401,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                   
@@ -405,6 +421,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                 </View>
@@ -444,6 +462,8 @@ export default function RoleWorkspaceScreen() {
                       placeholderTextColor={colors.textTertiary}
                       multiline
                       textAlignVertical="top"
+                      inputAccessoryViewID={inputAccessoryViewID}
+                      blurOnSubmit
                     />
                   </View>
                 </View>
@@ -698,6 +718,9 @@ export default function RoleWorkspaceScreen() {
               placeholder="DELETE"
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="characters"
+              returnKeyType="done"
+              inputAccessoryViewID={inputAccessoryViewID}
+              blurOnSubmit
             />
             <View style={styles.confirmActions}>
               <Pressable 
@@ -752,6 +775,7 @@ export default function RoleWorkspaceScreen() {
         feature={upgradeFeature.name}
         description={upgradeFeature.description}
       />
+      <DoneKeyboardAccessory nativeID={inputAccessoryViewID} onDone={() => Keyboard.dismiss()} />
     </SafeAreaView>
   );
 }
