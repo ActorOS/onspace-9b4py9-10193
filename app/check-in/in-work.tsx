@@ -56,10 +56,10 @@ export default function InWorkScreen() {
         exitedAt: new Date().toISOString(),
       });
 
-      // Route to category selection screen
+      // Route to tension identification screen first
       router.replace({
-        pathname: '/check-in/return-choice',
-        params: { sessionId },
+        pathname: '/check-in/post',
+        params: { sessionId, roleId: session.roleId },
       });
     } catch (error) {
       console.error('Failed to exit work:', error);
