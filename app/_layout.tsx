@@ -22,6 +22,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen 
+          name="check-in/flow" 
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
+        <Stack.Screen 
           name="check-in/pre" 
           options={{ presentation: 'modal' }}
         />

@@ -173,7 +173,7 @@ export default function HomeScreen() {
           
           <Pressable 
             style={styles.actionButton}
-            onPress={() => router.push('/check-in/pre')}
+            onPress={() => router.push('/check-in/flow')}
           >
             <MaterialIcons name="play-circle-outline" size={24} color={colors.primary} />
             <View style={styles.actionTextContainer}>
