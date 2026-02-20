@@ -204,7 +204,7 @@ export default function GentleGroundingExerciseScreen() {
       if (isStackMode) {
         router.back();
       } else {
-        router.back();
+        router.replace('/(tabs)');
       }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
