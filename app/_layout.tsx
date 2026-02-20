@@ -7,15 +7,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="actor-os" />
-        <Stack.Screen name="stay-connected" />
-        <Stack.Screen name="biometric-lock" />
+        <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="actor-os" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="stay-connected" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="biometric-lock" options={{ gestureEnabled: false }} />
         <Stack.Screen 
           name="email-updates" 
           options={{ presentation: 'modal' }}
         />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
         <Stack.Screen name="role/[id]" />
         <Stack.Screen 
           name="role/entry" 
@@ -27,11 +27,11 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="check-in/in-work" 
-          options={{ presentation: 'fullScreenModal' }}
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/post" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="grounding" 
@@ -51,23 +51,23 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="return/exercise-breathing" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-bodyscan" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-identity" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-identity-light" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-identity-full" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/identity-separation-choose" 
@@ -79,23 +79,23 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="return/exercise-grounding" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-recovery" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-recovery-standard" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-recovery-light" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/exercise-intimacy" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="return/quick-name" 
@@ -131,27 +131,27 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="check-in/confirm-enter" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/post-work-release" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/return-choice" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/recommended-release-list" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/return-to-self-list" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="check-in/somatic-release-list" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="settings/default-exercise" 
@@ -171,11 +171,11 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="somatic/select-track" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="somatic/play-track" 
-          options={{ presentation: 'modal' }}
+          options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="release-stack/list" 
@@ -195,7 +195,7 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="release-stack/play" 
-          options={{ presentation: 'fullScreenModal' }}
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
         />
         <Stack.Screen 
           name="release-stack/edit" 
