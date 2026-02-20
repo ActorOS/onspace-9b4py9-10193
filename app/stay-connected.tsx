@@ -18,16 +18,7 @@ export default function StayConnectedScreen() {
     return emailRegex.test(emailInput);
   };
 
-  const handleSkip = async () => {
-    try {
-      // Mark that user has seen this screen
-      await userSettingsStorage.markEmailSubscribed();
-    } catch (error) {
-      console.error('Failed to save skip status:', error);
-    }
-    // Route to home
-    router.replace('/(tabs)');
-  };
+
 
   const handleContinue = async () => {
     setError('');
@@ -90,7 +81,7 @@ export default function StayConnectedScreen() {
 
         <Text style={styles.title}>Get ActorOS updates</Text>
         <Text style={styles.bodyText}>
-          Feature releases, event invites, and new recovery tools. Optional.
+          Feature releases, event invites, and new recovery tools.
         </Text>
 
         <View style={styles.formContainer}>
@@ -125,14 +116,6 @@ export default function StayConnectedScreen() {
           ) : (
             <Text style={styles.primaryButtonText}>Continue</Text>
           )}
-        </Pressable>
-
-        <Pressable 
-          style={styles.secondaryButton} 
-          onPress={handleSkip}
-          disabled={isLoading}
-        >
-          <Text style={styles.secondaryButtonText}>Skip for now</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -196,7 +179,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    gap: spacing.sm,
   },
   primaryButton: {
     backgroundColor: colors.primary,
@@ -210,18 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.semibold,
     color: colors.background,
   },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
-    color: colors.textSecondary,
-  },
+
   buttonDisabled: {
     opacity: 0.5,
   },
