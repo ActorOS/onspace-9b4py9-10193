@@ -9,6 +9,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { trackExerciseStarted, trackExerciseCompleted } from '@/services/usageTracking';
 
 // Detailed 10-step body scan exercise with voice-led guidance
 // Slow progression from feet to head with extended holds
@@ -33,6 +34,7 @@ export default function BodyScanExerciseScreen() {
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<ScanStep>('arrival');
   const [audioError, setAudioError] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -207,11 +209,19 @@ export default function BodyScanExerciseScreen() {
   const handleBegin = async () => {
     setHasStarted(true);
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Body Scan');
+    setTrackingSessionId(tid);
     runBodyScanSequence();
   };
 
   const handleComplete = async () => {
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Body Scan', trackingSessionId);
+    }
     
     if (!sessionId) return;
     

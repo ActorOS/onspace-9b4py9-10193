@@ -9,6 +9,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { trackExerciseStarted, trackExerciseCompleted } from '@/services/usageTracking';
 
 // Detailed sequenced breathing exercise with voice-led guidance
 // 8-segment flow with repetition cycles for deep settling
@@ -20,6 +21,7 @@ export default function BreathingExerciseScreen() {
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'arrival' | 'settle' | 'inhale' | 'exhale' | 'repeat' | 'quiet' | 'return' | 'complete'>('arrival');
   const [cycleCount, setCycleCount] = useState(0);
   const [audioError, setAudioError] = useState(false);
@@ -192,12 +194,20 @@ export default function BreathingExerciseScreen() {
     setHasStarted(true);
     // Keep screen awake during exercise
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Breathing & Release');
+    setTrackingSessionId(tid);
     runBreathingSequence();
   };
 
   const handleComplete = async () => {
     // Allow screen to sleep again
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Breathing & Release', trackingSessionId);
+    }
     
     if (!sessionId) return;
     

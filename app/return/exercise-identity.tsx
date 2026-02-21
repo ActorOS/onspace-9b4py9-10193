@@ -9,6 +9,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { trackExerciseStarted, trackExerciseCompleted } from '@/services/usageTracking';
 
 // 9-step voice-led Identity Separation exercise
 // Helps performers distinguish self from character
@@ -32,6 +33,7 @@ export default function IdentitySeparationScreen() {
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<IdentityStep>('arrival');
   const [audioError, setAudioError] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -198,11 +200,19 @@ export default function IdentitySeparationScreen() {
   const handleBegin = async () => {
     setHasStarted(true);
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Identity Separation (Standard)');
+    setTrackingSessionId(tid);
     runIdentitySeparationSequence();
   };
 
   const handleComplete = async () => {
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Identity Separation (Standard)', trackingSessionId);
+    }
     
     if (!sessionId) return;
     

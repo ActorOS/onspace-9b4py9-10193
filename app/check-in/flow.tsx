@@ -11,6 +11,7 @@ import { sessionStorage } from '@/services/sessionStorage';
 import { aftereffectsStorage } from '@/services/aftereffectsStorage';
 import { tierStorage } from '@/services/tierStorage';
 import { UpgradePrompt } from '@/components';
+import { trackWorkloadSelected } from '@/services/usageTracking';
 
 // Flow states representing the entire check-in journey
 type FlowState = 
@@ -281,6 +282,10 @@ export default function CheckInFlowScreen() {
     if (!selectedRoleId || !weight) return;
 
     setIsEntering(true);
+    
+    // Track workload selection
+    await trackWorkloadSelected(weight);
+    
     try {
       const session = await sessionStorage.createSession({
         roleId: selectedRoleId,
