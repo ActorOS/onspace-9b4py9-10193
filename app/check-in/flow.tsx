@@ -107,33 +107,6 @@ const RECOMMENDED_EXERCISES: ExerciseOption[] = [
     workload: ['light', 'medium', 'heavy'],
     requiresPro: false,
   },
-  {
-    id: 'full-recovery-light',
-    title: 'Full Body Recovery (Light)',
-    purpose: 'Subtle reset after rehearsal',
-    icon: 'spa',
-    route: '/return/exercise-recovery-light',
-    workload: ['light'],
-    requiresPro: false,
-  },
-  {
-    id: 'full-recovery-standard',
-    title: 'Full Body Recovery (Standard)',
-    purpose: 'Restore balance after performance',
-    icon: 'spa',
-    route: '/return/exercise-recovery-standard',
-    workload: ['medium'],
-    requiresPro: true,
-  },
-  {
-    id: 'full-recovery',
-    title: 'Full Body Recovery',
-    purpose: 'Complete recovery after demanding work',
-    icon: 'spa',
-    route: '/return/exercise-recovery',
-    workload: ['heavy'],
-    requiresPro: true,
-  },
 ];
 
 const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
