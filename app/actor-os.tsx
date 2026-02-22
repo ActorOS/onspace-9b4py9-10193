@@ -98,12 +98,12 @@ export default function ActorOSScreen() {
       // Mark onboarding as completed
       await userSettingsStorage.completeOnboarding();
       
-      // Route to stay connected screen
-      router.replace('/stay-connected');
+      // Bypass email - go directly to home
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       // Still navigate even if storage fails
-      router.replace('/stay-connected');
+      router.replace('/(tabs)');
     }
   };
 
