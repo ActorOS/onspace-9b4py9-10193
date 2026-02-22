@@ -3,10 +3,13 @@ import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { roleStorage, type Role } from '@/services/roleStorage';
 import { sessionStorage, type WorkSession } from '@/services/sessionStorage';
 import { trackAppOpen } from '@/services/usageTracking';
+
+const PRIVACY_DISCLOSURE_KEY = 'privacy_disclosure_seen';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -16,6 +19,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const hasTrackedAppOpen = useRef(false);
+  const hasCheckedPrivacyDisclosure = useRef(false);
 
   const loadActiveRoles = async () => {
     setIsLoading(true);
@@ -58,8 +62,26 @@ export default function HomeScreen() {
         trackAppOpen();
         hasTrackedAppOpen.current = true;
       }
+      
+      // Check privacy disclosure only once
+      if (!hasCheckedPrivacyDisclosure.current) {
+        checkPrivacyDisclosure();
+        hasCheckedPrivacyDisclosure.current = true;
+      }
     }, [])
   );
+
+  const checkPrivacyDisclosure = async () => {
+    try {
+      const seen = await AsyncStorage.getItem(PRIVACY_DISCLOSURE_KEY);
+      if (seen !== 'true') {
+        // Navigate to privacy disclosure screen
+        router.push('/privacy-disclosure');
+      }
+    } catch (error) {
+      console.error('Failed to check privacy disclosure:', error);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

@@ -380,6 +380,25 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Privacy & Data */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Privacy & Data</Text>
+          
+          <Pressable 
+            style={styles.settingCard}
+            onPress={() => router.push('/settings/privacy')}
+          >
+            <View style={styles.settingRow}>
+              <MaterialIcons name="privacy-tip" size={20} color={colors.textSecondary} />
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Privacy Notice</Text>
+                <Text style={styles.settingDescription}>View data collection details</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </View>
+          </Pressable>
+        </View>
+
         {/* Data Management */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data management</Text>

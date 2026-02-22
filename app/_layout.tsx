@@ -213,6 +213,14 @@ export default function RootLayout() {
           name="intimacy-framework" 
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen 
+          name="privacy-disclosure" 
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="settings/privacy" 
+          options={{ presentation: 'modal' }}
+        />
       </Stack>
     </SafeAreaProvider>
   );
