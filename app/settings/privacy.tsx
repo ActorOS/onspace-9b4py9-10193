@@ -52,32 +52,12 @@ export default function PrivacyNoticeScreen() {
             </View>
           </View>
 
-          {/* Data storage */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Data storage</Text>
-            <View style={styles.sectionContent}>
-              <Text style={styles.bodyText}>
-                Data is stored securely using OnSpace Cloud (Supabase-compatible backend).
-              </Text>
-            </View>
-          </View>
-
           {/* Email addresses */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Email addresses</Text>
             <View style={styles.sectionContent}>
               <Text style={styles.bodyText}>
                 If you provide your email, it may be used for ActorOS updates, feature releases, and event invites. You can opt out at any time.
-              </Text>
-            </View>
-          </View>
-
-          {/* Contact / deletion */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Contact / deletion</Text>
-            <View style={styles.sectionContent}>
-              <Text style={styles.bodyText}>
-                To request deletion of your email or pilot data, contact: contact@onspace.ai
               </Text>
             </View>
           </View>
