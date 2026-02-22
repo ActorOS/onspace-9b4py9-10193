@@ -14,21 +14,20 @@ import { aftereffectsStorage } from '@/services/aftereffectsStorage';
 import { auditionStorage } from '@/services/auditionStorage';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { tierStorage, type UserTier } from '@/services/tierStorage';
-import { biometricLockStorage, type BiometricCapability } from '@/services/biometricLockStorage';
+import { passwordLockStorage } from '@/services/passwordLockStorage';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [biometricCapability, setBiometricCapability] = useState<BiometricCapability | null>(null);
-  const [biometricLockEnabled, setBiometricLockEnabled] = useState(false);
+  const [passwordLockEnabled, setPasswordLockEnabled] = useState(false);
+  const [hasPassword, setHasPassword] = useState(false);
   const [currentTier, setCurrentTier] = useState<UserTier>('free');
 
   useFocusEffect(
     useCallback(() => {
       loadSettings();
-      checkBiometricCapability();
-      loadBiometricLockStatus();
+      loadPasswordLockStatus();
       loadTier();
     }, [])
   );
@@ -51,23 +50,16 @@ export default function SettingsScreen() {
     }
   };
 
-  const checkBiometricCapability = async () => {
+  const loadPasswordLockStatus = async () => {
     try {
-      const capability = await biometricLockStorage.checkCapability();
-      setBiometricCapability(capability);
+      const enabled = await passwordLockStorage.isEnabled();
+      const hasPass = await passwordLockStorage.hasPassword();
+      setPasswordLockEnabled(enabled);
+      setHasPassword(hasPass);
     } catch (error) {
-      console.error('Failed to check biometric capability:', error);
-      setBiometricCapability(null);
-    }
-  };
-
-  const loadBiometricLockStatus = async () => {
-    try {
-      const enabled = await biometricLockStorage.isEnabled();
-      setBiometricLockEnabled(enabled);
-    } catch (error) {
-      console.error('Failed to load biometric lock status:', error);
-      setBiometricLockEnabled(false);
+      console.error('Failed to load password lock status:', error);
+      setPasswordLockEnabled(false);
+      setHasPassword(false);
     }
   };
 
@@ -84,54 +76,31 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleBiometricToggle = async (value: boolean) => {
-    if (!biometricCapability) {
-      Alert.alert('Error', 'Unable to check biometric capability');
-      return;
-    }
-
+  const handlePasswordToggle = async (value: boolean) => {
     if (value) {
-      // Check capability before enabling
-      if (!biometricCapability.hasHardware) {
-        Alert.alert(
-          'Not Supported',
-          'Biometric authentication is not supported on this device.'
-        );
+      // Check if password is set
+      if (!hasPassword) {
+        // Navigate to password setup
+        router.push('/settings/password-setup');
         return;
       }
 
-      if (!biometricCapability.isEnrolled) {
-        const biometricName = biometricLockStorage.getBiometricTypeName(biometricCapability.biometricType);
+      // Enable password lock
+      try {
+        await passwordLockStorage.enable();
+        setPasswordLockEnabled(true);
         Alert.alert(
-          'Biometrics Not Set Up',
-          `Please set up ${biometricName} in your device settings, then try again.`,
-          [
-            { text: 'OK' }
-          ]
+          'Password Lock Enabled',
+          'Actor OS will now require your password after 30 seconds of inactivity.'
         );
-        return;
-      }
-
-      // Test biometric authentication before enabling
-      const result = await biometricLockStorage.authenticate('Enable Biometric Lock');
-
-      if (result.success) {
-        await biometricLockStorage.enable();
-        setBiometricLockEnabled(true);
-        Alert.alert(
-          'Biometric Lock Enabled',
-          'Actor OS will now require authentication when you open the app or return after 30 seconds of inactivity.'
-        );
-      } else {
-        Alert.alert(
-          'Authentication Failed',
-          result.error || 'Unable to enable Biometric Lock'
-        );
+      } catch (error) {
+        console.error('Failed to enable password lock:', error);
+        Alert.alert('Error', 'Failed to enable Password Lock');
       }
     } else {
       // Confirm before disabling
       Alert.alert(
-        'Disable Biometric Lock',
+        'Disable Password Lock',
         'Your role containers and notes will be accessible without authentication. Continue?',
         [
           { text: 'Cancel', style: 'cancel' },
@@ -139,8 +108,13 @@ export default function SettingsScreen() {
             text: 'Disable',
             style: 'destructive',
             onPress: async () => {
-              await biometricLockStorage.disable();
-              setBiometricLockEnabled(false);
+              try {
+                await passwordLockStorage.disable();
+                setPasswordLockEnabled(false);
+              } catch (error) {
+                console.error('Failed to disable password lock:', error);
+                Alert.alert('Error', 'Failed to disable Password Lock');
+              }
             }
           }
         ]
@@ -253,28 +227,78 @@ export default function SettingsScreen() {
             <View style={styles.settingRow}>
               <MaterialIcons name="lock" size={20} color={colors.textSecondary} />
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Biometric Lock</Text>
+                <Text style={styles.settingTitle}>Password Lock</Text>
                 <Text style={styles.settingDescription}>
-                  {!biometricCapability 
-                    ? 'Checking capability...'
-                    : !biometricCapability.hasHardware
-                    ? 'Not supported on this device'
-                    : !biometricCapability.isEnrolled
-                    ? `${biometricLockStorage.getBiometricTypeName(biometricCapability.biometricType)} not set up`
-                    : biometricLockEnabled
+                  {!hasPassword
+                    ? 'Set a password to protect your data'
+                    : passwordLockEnabled
                     ? 'App locked after 30s inactivity'
-                    : 'Require authentication to open app'}
+                    : 'Require password to open app'}
                 </Text>
               </View>
               <Switch
-                value={biometricLockEnabled}
-                onValueChange={handleBiometricToggle}
+                value={passwordLockEnabled}
+                onValueChange={handlePasswordToggle}
                 trackColor={{ false: colors.border, true: colors.primaryDark }}
                 thumbColor={colors.textPrimary}
-                disabled={!biometricCapability || !biometricCapability.hasHardware}
               />
             </View>
           </View>
+
+          {hasPassword && (
+            <Pressable 
+              style={styles.settingCard}
+              onPress={() => router.push('/settings/password-change')}
+            >
+              <View style={styles.settingRow}>
+                <MaterialIcons name="vpn-key" size={20} color={colors.textSecondary} />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingTitle}>Change Password</Text>
+                  <Text style={styles.settingDescription}>Update your password</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+              </View>
+            </Pressable>
+          )}
+
+          {hasPassword && (
+            <Pressable 
+              style={styles.settingCard}
+              onPress={() => {
+                Alert.alert(
+                  'Remove Password',
+                  'This will permanently remove your password and disable Password Lock. Continue?',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Remove',
+                      style: 'destructive',
+                      onPress: async () => {
+                        try {
+                          await passwordLockStorage.removePassword();
+                          setPasswordLockEnabled(false);
+                          setHasPassword(false);
+                          Alert.alert('Success', 'Password removed');
+                        } catch (error) {
+                          console.error('Failed to remove password:', error);
+                          Alert.alert('Error', 'Failed to remove password');
+                        }
+                      }
+                    }
+                  ]
+                );
+              }}
+            >
+              <View style={styles.settingRow}>
+                <MaterialIcons name="delete-outline" size={20} color={colors.error} />
+                <View style={styles.settingTextContainer}>
+                  <Text style={[styles.settingTitle, { color: colors.error }]}>Remove Password</Text>
+                  <Text style={styles.settingDescription}>Disable password protection</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+              </View>
+            </Pressable>
+          )}
         </View>
 
         {/* Notifications Section */}

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { userSettingsStorage } from '@/services/userSettingsStorage';
-import { biometricLockStorage } from '@/services/biometricLockStorage';
+import { passwordLockStorage } from '@/services/passwordLockStorage';
 import { colors } from '@/constants/theme';
 
 export default function IndexScreen() {
@@ -23,12 +23,12 @@ export default function IndexScreen() {
         return;
       }
 
-      // Check if biometric lock is enabled
-      const biometricEnabled = await biometricLockStorage.isEnabled();
+      // Check if password lock is enabled
+      const passwordEnabled = await passwordLockStorage.isEnabled();
       
-      if (biometricEnabled) {
-        // Require biometric authentication
-        router.replace('/biometric-lock');
+      if (passwordEnabled) {
+        // Require password authentication
+        router.replace('/password-lock');
       } else {
         // Go directly to home
         router.replace('/(tabs)');

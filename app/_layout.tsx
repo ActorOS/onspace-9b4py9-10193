@@ -10,7 +10,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ gestureEnabled: false }} />
         <Stack.Screen name="actor-os" options={{ gestureEnabled: false }} />
         <Stack.Screen name="stay-connected" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="biometric-lock" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="password-lock" options={{ gestureEnabled: false }} />
         <Stack.Screen 
           name="email-updates" 
           options={{ presentation: 'modal' }}
@@ -219,6 +219,14 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="settings/privacy" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="settings/password-setup" 
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen 
+          name="settings/password-change" 
           options={{ presentation: 'modal' }}
         />
       </Stack>
