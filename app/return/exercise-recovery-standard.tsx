@@ -10,6 +10,7 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 import { tierStorage } from '@/services/tierStorage';
+import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
 
 // Full Body Recovery Standard - 10-minute balanced version
 // Comprehensive somatic release with guided breath + discharge - ~9-11 minutes
@@ -34,6 +35,7 @@ export default function FullBodyRecoveryStandardScreen() {
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<RecoveryStandardStep>('arrival');
   const [audioError, setAudioError] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -243,11 +245,19 @@ export default function FullBodyRecoveryStandardScreen() {
   const handleBegin = async () => {
     setHasStarted(true);
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Full Body Recovery (Standard)');
+    setTrackingSessionId(tid);
     runRecoveryStandardSequence();
   };
 
   const handleComplete = async () => {
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Full Body Recovery (Standard)', trackingSessionId);
+    }
     
     if (!sessionId) return;
     
@@ -290,12 +300,26 @@ export default function FullBodyRecoveryStandardScreen() {
       clearTimeout(timeoutRef.current);
     }
     
+    // Track abandonment if exercise was started but not completed
+    const trackAbandon = async () => {
+      if (hasStarted && currentStep !== 'complete' && trackingSessionId) {
+        await trackExerciseAbandoned('Full Body Recovery (Standard)', trackingSessionId);
+      }
+    };
+    
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
       [
         { text: 'Stay', style: 'cancel' },
-        { text: 'Exit', style: 'destructive', onPress: () => router.back() },
+        { 
+          text: 'Exit', 
+          style: 'destructive', 
+          onPress: () => {
+            trackAbandon();
+            router.back();
+          }
+        },
       ]
     );
   };

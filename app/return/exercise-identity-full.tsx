@@ -11,6 +11,7 @@ import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 import { tierStorage } from '@/services/tierStorage';
 import { UpgradePrompt } from '@/components';
+import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
 
 // Identity Separation Full Release - 16-step comprehensive version
 // Deep separation process for medium/heavy workload sessions - ~12 minutes
@@ -44,6 +45,7 @@ export default function IdentitySeparationFullScreen() {
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<IdentityFullStep>('arrival');
   const [audioError, setAudioError] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -280,11 +282,19 @@ export default function IdentitySeparationFullScreen() {
   const handleBegin = async () => {
     setHasStarted(true);
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Identity Separation (Full)');
+    setTrackingSessionId(tid);
     runFullIdentitySequence();
   };
 
   const handleComplete = async () => {
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Identity Separation (Full)', trackingSessionId);
+    }
     
     if (!sessionId) return;
     
@@ -332,12 +342,26 @@ export default function IdentitySeparationFullScreen() {
       return;
     }
     
+    // Track abandonment if exercise was started but not completed
+    const trackAbandon = async () => {
+      if (hasStarted && currentStep !== 'complete' && trackingSessionId) {
+        await trackExerciseAbandoned('Identity Separation (Full)', trackingSessionId);
+      }
+    };
+    
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
       [
         { text: 'Stay', style: 'cancel' },
-        { text: 'Exit', style: 'destructive', onPress: () => router.back() },
+        { 
+          text: 'Exit', 
+          style: 'destructive', 
+          onPress: () => {
+            trackAbandon();
+            router.back();
+          }
+        },
       ]
     );
   };

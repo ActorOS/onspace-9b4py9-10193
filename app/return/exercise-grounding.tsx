@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
+import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
 
 // Time-governed sensory grounding exercise
 // 7-step voice-led flow using 3-2-1 sensory framework
@@ -29,6 +30,7 @@ export default function GentleGroundingExerciseScreen() {
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [audioError, setAudioError] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -173,11 +175,19 @@ export default function GentleGroundingExerciseScreen() {
   const handleBegin = async () => {
     setHasStarted(true);
     await activateKeepAwakeAsync();
+    // Track exercise start
+    const tid = await trackExerciseStarted('Gentle Grounding');
+    setTrackingSessionId(tid);
     runGroundingSequence();
   };
 
   const handleComplete = async () => {
     deactivateKeepAwake();
+    
+    // Track exercise completion
+    if (trackingSessionId) {
+      await trackExerciseCompleted('Gentle Grounding', trackingSessionId);
+    }
     
     if (!sessionId) return;
     
@@ -221,12 +231,27 @@ export default function GentleGroundingExerciseScreen() {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    
+    // Track abandonment if exercise was started but not completed
+    const trackAbandon = async () => {
+      if (hasStarted && !isComplete && trackingSessionId) {
+        await trackExerciseAbandoned('Gentle Grounding', trackingSessionId);
+      }
+    };
+    
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
       [
         { text: 'Stay', style: 'cancel' },
-        { text: 'Exit', style: 'destructive', onPress: () => router.back() },
+        { 
+          text: 'Exit', 
+          style: 'destructive', 
+          onPress: () => {
+            trackAbandon();
+            router.back();
+          }
+        },
       ]
     );
   };
