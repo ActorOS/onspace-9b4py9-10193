@@ -113,13 +113,26 @@ export default function HomeScreen() {
           <Text style={styles.pageTagline}>A place to return to yourself</Text>
         </View>
 
-        {/* Top Anchor */}
-        <View style={styles.anchorSection}>
-          <Text style={styles.anchorText}>What are you carrying today?</Text>
-          <Text style={styles.anchorSubtext}>
-            Check in before you enter or release work.
-          </Text>
-        </View>
+        {/* Top Anchor - Check-in CTA */}
+        <Pressable 
+          style={({ pressed }) => [
+            styles.anchorSection,
+            pressed && styles.anchorSectionPressed
+          ]}
+          onPress={() => router.push('/(tabs)/load')}
+          accessibilityRole="button"
+          accessibilityLabel="Check in: what are you carrying today? Open Load."
+        >
+          <View style={styles.anchorContent}>
+            <View style={styles.anchorTextContainer}>
+              <Text style={styles.anchorText}>What are you carrying today?</Text>
+              <Text style={styles.anchorSubtext}>
+                Check in before you enter or release work.
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} style={styles.anchorChevron} />
+          </View>
+        </Pressable>
 
         {/* Current Roles Section */}
         <View style={styles.firstSection}>
@@ -317,6 +330,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
+  },
+  anchorSectionPressed: {
+    opacity: 0.6,
+  },
+  anchorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  anchorTextContainer: {
+    flex: 1,
+  },
+  anchorChevron: {
+    marginLeft: spacing.sm,
+    opacity: 0.6,
   },
   anchorText: {
     fontSize: typography.sizes.lg,
