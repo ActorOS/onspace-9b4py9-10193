@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { roleStorage, type Role } from '@/services/roleStorage';
 import { sessionStorage, type WorkSession } from '@/services/sessionStorage';
+import { trackAppOpen } from '@/services/usageTracking';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -14,6 +15,7 @@ export default function HomeScreen() {
   const [recentSessions, setRecentSessions] = useState<WorkSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+  const hasTrackedAppOpen = useRef(false);
 
   const loadActiveRoles = async () => {
     setIsLoading(true);
@@ -50,6 +52,12 @@ export default function HomeScreen() {
     useCallback(() => {
       loadActiveRoles();
       loadRecentSessions();
+      
+      // Track app_open only once per session
+      if (!hasTrackedAppOpen.current) {
+        trackAppOpen();
+        hasTrackedAppOpen.current = true;
+      }
     }, [])
   );
 

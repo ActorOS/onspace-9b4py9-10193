@@ -1,7 +1,18 @@
 import { getSupabaseClient } from '@/template';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DEVICE_ID_KEY = '@actor_os_device_id';
+const DEVICE_ID_KEY = 'actoros_device_id';
+
+/**
+ * Generate a UUID v4
+ */
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 /**
  * Get or create a persistent device ID for anonymous tracking
@@ -10,8 +21,8 @@ async function getDeviceId(): Promise<string | null> {
   try {
     let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
     if (!deviceId) {
-      // Generate a new device ID
-      deviceId = `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      // Generate a new UUID device ID
+      deviceId = generateUUID();
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
     return deviceId;
@@ -22,10 +33,10 @@ async function getDeviceId(): Promise<string | null> {
 }
 
 /**
- * Generate a random session ID
+ * Generate a random session ID (UUID)
  */
 function generateSessionId(): string {
-  return `${Date.now()}_${Math.random().toString(36).substring(7)}_${Math.random().toString(36).substring(7)}`;
+  return generateUUID();
 }
 
 /**
@@ -106,9 +117,63 @@ export async function trackWorkloadSelected(workload: string): Promise<void> {
       });
 
     if (error) {
-      console.error('Failed to track workload selected:', error);
+      console.warn('[Analytics] Failed to track workload selected:', error);
     }
   } catch (error) {
-    console.error('Failed to track workload selected:', error);
+    console.warn('[Analytics] Failed to track workload selected:', error);
+  }
+}
+
+/**
+ * Track app open event (first load per session)
+ */
+export async function trackAppOpen(): Promise<void> {
+  const supabase = getSupabaseClient();
+  const deviceId = await getDeviceId();
+  const sessionId = generateSessionId();
+
+  try {
+    const { error } = await supabase
+      .from('pilot_usage')
+      .insert({
+        event_type: 'app_open',
+        exercise_name: null,
+        session_id: sessionId,
+        user_id: deviceId,
+      });
+
+    if (error) {
+      console.warn('[Analytics] Failed to track app open:', error);
+    }
+  } catch (error) {
+    console.warn('[Analytics] Failed to track app open:', error);
+  }
+}
+
+/**
+ * Track exercise abandon event (user exits before completion)
+ */
+export async function trackExerciseAbandoned(
+  exerciseName: string,
+  sessionId: string
+): Promise<void> {
+  const supabase = getSupabaseClient();
+  const deviceId = await getDeviceId();
+
+  try {
+    const { error } = await supabase
+      .from('pilot_usage')
+      .insert({
+        event_type: 'exercise_abandon',
+        exercise_name: exerciseName,
+        session_id: sessionId,
+        user_id: deviceId,
+      });
+
+    if (error) {
+      console.warn('[Analytics] Failed to track exercise abandoned:', error);
+    }
+  } catch (error) {
+    console.warn('[Analytics] Failed to track exercise abandoned:', error);
   }
 }

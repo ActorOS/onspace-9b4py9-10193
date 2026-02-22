@@ -9,7 +9,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
-import { trackExerciseStarted, trackExerciseCompleted } from '@/services/usageTracking';
+import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
 
 // Detailed 10-step body scan exercise with voice-led guidance
 // Slow progression from feet to head with extended holds
@@ -265,12 +265,27 @@ export default function BodyScanExerciseScreen() {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    
+    // Track abandonment if exercise was started but not completed
+    const trackAbandon = async () => {
+      if (hasStarted && currentStep !== 'complete' && trackingSessionId) {
+        await trackExerciseAbandoned('Body Scan', trackingSessionId);
+      }
+    };
+    
     Alert.alert(
       'Exit Exercise',
       'Are you sure you want to exit? Your progress will not be saved.',
       [
         { text: 'Stay', style: 'cancel' },
-        { text: 'Exit', style: 'destructive', onPress: () => router.back() },
+        { 
+          text: 'Exit', 
+          style: 'destructive', 
+          onPress: () => {
+            trackAbandon();
+            router.back();
+          }
+        },
       ]
     );
   };
