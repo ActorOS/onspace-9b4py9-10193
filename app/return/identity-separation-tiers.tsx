@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { tierStorage } from '@/services/tierStorage';
@@ -41,6 +41,8 @@ const IDENTITY_TIERS: IdentityTier[] = [
 
 export default function IdentitySeparationTiersScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const returnTo = (params.returnTo as string) || '/(tabs)';
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [selectedTier, setSelectedTier] = useState<IdentityTier | null>(null);
@@ -60,14 +62,14 @@ export default function IdentitySeparationTiersScreen() {
       setShowUpgradePrompt(true);
       return;
     }
-    router.push(tier.route as any);
+    router.replace({ pathname: tier.route as any, params: { returnTo } });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable onPress={() => router.replace(returnTo)} style={styles.backButton}>
           <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Identity Separation</Text>
@@ -148,7 +150,7 @@ export default function IdentitySeparationTiersScreen() {
             styles.backToListButton,
             pressed && { opacity: 0.7 }
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace(returnTo)}
         >
           <Text style={styles.backToListButtonText}>Back to Exercise List</Text>
         </Pressable>

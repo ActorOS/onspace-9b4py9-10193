@@ -10,6 +10,7 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 
 // Full Body Recovery Light - 5-minute condensed version
 // Quick somatic release with guided breath - ~5 minutes
@@ -29,6 +30,7 @@ type RecoveryLightStep =
 export default function FullBodyRecoveryLightScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { onClose, returnTo } = useReturnHubBack();
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -239,7 +241,7 @@ export default function FullBodyRecoveryLightScreen() {
       if (isStackMode) {
         router.back();
       } else {
-        router.replace('/(tabs)');
+        router.replace(returnTo);
       }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
@@ -274,7 +276,7 @@ export default function FullBodyRecoveryLightScreen() {
           style: 'destructive', 
           onPress: () => {
             trackAbandon();
-            router.back();
+            onClose();
           }
         },
       ]
@@ -367,7 +369,7 @@ export default function FullBodyRecoveryLightScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={handleExit} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Recovery — Light</Text>

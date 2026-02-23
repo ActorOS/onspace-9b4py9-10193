@@ -9,7 +9,7 @@ import { Audio } from 'expo-av';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
-import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 
 // Detailed sequenced breathing exercise with voice-led guidance
 // 8-segment flow with repetition cycles for deep settling
@@ -18,6 +18,7 @@ import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } 
 export default function BreathingExerciseScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { onClose, returnTo } = useReturnHubBack();
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -230,11 +231,11 @@ export default function BreathingExerciseScreen() {
         });
       }
       
-      // If in stack mode, go back to play screen; otherwise go home
+      // If in stack mode, go back to play screen; otherwise return to Return Hub
       if (isStackMode) {
         router.back();
       } else {
-        router.replace('/(tabs)');
+        router.replace(returnTo);
       }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
@@ -270,7 +271,7 @@ export default function BreathingExerciseScreen() {
           style: 'destructive', 
           onPress: () => {
             trackAbandon();
-            router.back();
+            onClose();
           }
         },
       ]
@@ -335,7 +336,7 @@ export default function BreathingExerciseScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={handleExit} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Breathing & Release</Text>

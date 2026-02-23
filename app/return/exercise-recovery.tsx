@@ -11,6 +11,7 @@ import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 import { tierStorage } from '@/services/tierStorage';
 import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 
 // Full Body Recovery Sequence
 // Comprehensive somatic release with guided breath + discharge - ~14-16 minutes
@@ -41,6 +42,7 @@ type RecoveryStep =
 export default function FullBodyRecoveryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { onClose, returnTo } = useReturnHubBack();
   const isStackMode = params.stackMode === 'true';
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -291,7 +293,7 @@ export default function FullBodyRecoveryScreen() {
       if (isStackMode) {
         router.back();
       } else {
-        router.replace('/(tabs)');
+        router.replace(returnTo);
       }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
@@ -326,7 +328,7 @@ export default function FullBodyRecoveryScreen() {
           style: 'destructive', 
           onPress: () => {
             trackAbandon();
-            router.back();
+            onClose();
           }
         },
       ]
@@ -438,7 +440,7 @@ export default function FullBodyRecoveryScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={handleExit} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Full Recovery</Text>

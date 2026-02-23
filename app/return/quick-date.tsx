@@ -2,12 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 
 export default function QuickDateScreen() {
   const router = useRouter();
+  const { onClose, returnTo } = useReturnHubBack();
   const today = new Date();
   const dateString = today.toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -27,7 +29,7 @@ export default function QuickDateScreen() {
         completionType: 'quick',
         notes: 'Quick return: Date',
       });
-      router.back();
+      router.replace(returnTo);
     } catch (error) {
       console.error('Failed to log return session:', error);
       Alert.alert('Error', 'Failed to log session');
@@ -37,7 +39,7 @@ export default function QuickDateScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Date</Text>

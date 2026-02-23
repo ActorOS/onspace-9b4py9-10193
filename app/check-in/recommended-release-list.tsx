@@ -62,6 +62,7 @@ export default function RecommendedReleaseListScreen() {
   const params = useLocalSearchParams();
   
   const sessionId = params.sessionId as string | undefined;
+  const returnTo = (params.returnTo as string) || '/check-in/return-choice';
   const [workloadLevel, setWorkloadLevel] = useState<'light' | 'medium' | 'heavy' | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
@@ -102,7 +103,7 @@ export default function RecommendedReleaseListScreen() {
       setShowUpgradePrompt(true);
       return;
     }
-    router.replace(exercise.route);
+    router.replace({ pathname: exercise.route, params: { returnTo } });
   };
 
   const recommendedExercises = getRecommendedExercises();
@@ -111,7 +112,7 @@ export default function RecommendedReleaseListScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable onPress={() => router.replace(returnTo)} style={styles.backButton}>
           <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Recommended Release</Text>
@@ -200,7 +201,7 @@ export default function RecommendedReleaseListScreen() {
             styles.skipButton,
             pressed && { opacity: 0.7 }
           ]}
-          onPress={() => router.replace('/(tabs)')}
+          onPress={() => router.replace(returnTo)}
         >
           <Text style={styles.skipButtonText}>Skip for now</Text>
         </Pressable>

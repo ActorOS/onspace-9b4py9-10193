@@ -12,6 +12,7 @@ import { systemVoiceAudio } from '@/constants/systemAudio';
 import { tierStorage } from '@/services/tierStorage';
 import { UpgradePrompt } from '@/components';
 import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 
 // Identity Separation Full Release - 16-step comprehensive version
 // Deep separation process for medium/heavy workload sessions - ~12 minutes
@@ -39,6 +40,7 @@ type IdentityFullStep =
 export default function IdentitySeparationFullScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { onClose, returnTo } = useReturnHubBack();
   const isStackMode = params.stackMode === 'true';
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
@@ -319,7 +321,7 @@ export default function IdentitySeparationFullScreen() {
       if (isStackMode) {
         router.back();
       } else {
-        router.replace('/(tabs)');
+        router.replace(returnTo);
       }
     } catch (error) {
       console.error('Failed to complete exercise:', error);
@@ -359,7 +361,7 @@ export default function IdentitySeparationFullScreen() {
           style: 'destructive', 
           onPress: () => {
             trackAbandon();
-            router.back();
+            onClose();
           }
         },
       ]
@@ -502,7 +504,7 @@ export default function IdentitySeparationFullScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <Pressable onPress={handleExit} style={styles.headerButton}>
+          <Pressable onPress={onClose} style={styles.headerButton}>
             <MaterialIcons name="close" size={24} color={colors.textPrimary} />
           </Pressable>
           <Text style={styles.headerTitle}>Full Release</Text>
@@ -547,7 +549,7 @@ export default function IdentitySeparationFullScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={handleExit} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Full Release</Text>

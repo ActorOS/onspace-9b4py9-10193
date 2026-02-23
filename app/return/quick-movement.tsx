@@ -4,11 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
-import { returnSessionStorage } from '@/services/returnSessionStorage';
+import { useReturnHubBack } from '@/hooks/useReturnHubBack';
 
 export default function QuickMovementScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { onClose, returnTo } = useReturnHubBack();
   const isStackMode = params.stackMode === 'true';
 
   const handleDone = async () => {
@@ -25,7 +26,7 @@ export default function QuickMovementScreen() {
           notes: 'Quick return: Movement',
         });
       }
-      router.back();
+      router.replace(returnTo);
     } catch (error) {
       console.error('Failed to log return session:', error);
       Alert.alert('Error', 'Failed to log session');
@@ -35,7 +36,7 @@ export default function QuickMovementScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.headerButton}>
+        <Pressable onPress={onClose} style={styles.headerButton}>
           <MaterialIcons name="close" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Movement</Text>
