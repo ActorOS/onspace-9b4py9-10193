@@ -464,8 +464,24 @@ export default function RoleEntryScreen() {
                       <Pressable 
                         style={styles.nextStepButton}
                         onPress={async () => {
-                          await handleComplete();
-                          router.push('/check-in/pre');
+                          setIsSaving(true);
+                          try {
+                            await roleStorage.saveRole({
+                              characterName: characterName.trim(),
+                              production: production.trim(),
+                              productionType: productionType || undefined,
+                              whatRoleAsks: whatRoleAsks.trim() || undefined,
+                              boundaries: boundaries.trim() || undefined,
+                              status: 'open',
+                              startDate: startDate?.toISOString(),
+                              endDate: isOngoing ? undefined : endDate?.toISOString(),
+                              isOngoing: isOngoing || undefined,
+                            });
+                            router.push('/check-in/pre');
+                          } catch (error) {
+                            console.error('Failed to save role:', error);
+                            setIsSaving(false);
+                          }
                         }}
                       >
                         <MaterialIcons name="play-circle-outline" size={24} color={colors.primary} />
@@ -474,7 +490,27 @@ export default function RoleEntryScreen() {
 
                       <Pressable 
                         style={styles.nextStepButton}
-                        onPress={handleComplete}
+                        onPress={async () => {
+                          setIsSaving(true);
+                          try {
+                            const newRole = await roleStorage.saveRole({
+                              characterName: characterName.trim(),
+                              production: production.trim(),
+                              productionType: productionType || undefined,
+                              whatRoleAsks: whatRoleAsks.trim() || undefined,
+                              boundaries: boundaries.trim() || undefined,
+                              status: 'open',
+                              startDate: startDate?.toISOString(),
+                              endDate: isOngoing ? undefined : endDate?.toISOString(),
+                              isOngoing: isOngoing || undefined,
+                            });
+                            router.dismiss();
+                            router.push(`/role/${newRole.id}`);
+                          } catch (error) {
+                            console.error('Failed to save role:', error);
+                            setIsSaving(false);
+                          }
+                        }}
                       >
                         <MaterialIcons name="edit" size={24} color={colors.textSecondary} />
                         <Text style={styles.nextStepButtonText}>Add character notes</Text>
