@@ -384,24 +384,6 @@ export default function SettingsScreen() {
               />
             </View>
           </View>
-
-          {settings.voiceGuidanceEnabled && (
-            <Pressable 
-              style={styles.settingCard}
-              onPress={() => router.push('/settings/voice-settings')}
-            >
-              <View style={styles.settingRow}>
-                <MaterialIcons name="tune" size={20} color={colors.textSecondary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Voice Settings</Text>
-                  <Text style={styles.settingDescription}>
-                    Style, speed, and volume
-                  </Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
-              </View>
-            </Pressable>
-          )}
         </View>
 
         {/* Privacy & Data */}
