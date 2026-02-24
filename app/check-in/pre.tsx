@@ -45,7 +45,7 @@ export default function PreWorkCheckInScreen() {
   const handleNext = () => {
     if (currentStep === 'arrival') {
       setCurrentStep('role');
-    } else if (currentStep === 'role' && selectedRoleId) {
+    } else if (currentStep === 'role') {
       setCurrentStep('weight');
     } else if (currentStep === 'weight' && weight) {
       // Navigate to different screens based on weight selection
