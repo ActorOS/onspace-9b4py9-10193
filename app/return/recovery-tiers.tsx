@@ -6,6 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { tierStorage } from '@/services/tierStorage';
 import { UpgradePrompt } from '@/components';
+import { RETURN_HUB_PATH } from '@/hooks/useReturnHubBack';
 
 type RecoveryTier = {
   id: string;
@@ -50,7 +51,7 @@ const RECOVERY_TIERS: RecoveryTier[] = [
 export default function RecoveryTiersScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const returnTo = (params.returnTo as string) || '/(tabs)';
+  const returnTo = (params.returnTo as string) || RETURN_HUB_PATH;
   const insets = useSafeAreaInsets();
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);

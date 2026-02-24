@@ -103,8 +103,8 @@ export default function RecommendedReleaseListScreen() {
       setShowUpgradePrompt(true);
       return;
     }
-    // After recommended exercises, always return home
-    router.replace({ pathname: exercise.route, params: { returnTo: '/(tabs)' } });
+    // Pass through returnTo from params (defaults to return hub)
+    router.replace({ pathname: exercise.route, params: { returnTo } });
   };
 
   const recommendedExercises = getRecommendedExercises();

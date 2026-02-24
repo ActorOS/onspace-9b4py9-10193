@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
+import { RETURN_HUB_PATH } from '@/hooks/useReturnHubBack';
 import { sessionStorage } from '@/services/sessionStorage';
 
 export default function ReturnChoiceScreen() {
@@ -30,21 +31,27 @@ export default function ReturnChoiceScreen() {
   };
 
   const handleRecommendedRelease = () => {
-    // Navigate to recommended release exercise list
+    // Navigate to recommended release exercise list with returnTo param
     router.replace({
       pathname: '/check-in/recommended-release-list',
-      params: { sessionId }
+      params: { sessionId, returnTo: RETURN_HUB_PATH }
     });
   };
 
   const handleReturnToSelf = () => {
-    // Navigate to return to self exercise list
-    router.replace('/check-in/return-to-self-list');
+    // Navigate to return to self exercise list with returnTo param
+    router.replace({
+      pathname: '/check-in/return-to-self-list',
+      params: { returnTo: RETURN_HUB_PATH }
+    });
   };
 
   const handleSomaticRelease = () => {
-    // Navigate to somatic release exercise list
-    router.replace('/check-in/somatic-release-list');
+    // Navigate to somatic release exercise list with returnTo param
+    router.replace({
+      pathname: '/check-in/somatic-release-list',
+      params: { returnTo: RETURN_HUB_PATH }
+    });
   };
 
   const handleSkip = () => {

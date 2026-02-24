@@ -6,6 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { tierStorage } from '@/services/tierStorage';
 import { UpgradePrompt } from '@/components';
+import { RETURN_HUB_PATH } from '@/hooks/useReturnHubBack';
 
 type IdentityTier = {
   id: string;
@@ -42,7 +43,7 @@ const IDENTITY_TIERS: IdentityTier[] = [
 export default function IdentitySeparationTiersScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const returnTo = (params.returnTo as string) || '/(tabs)';
+  const returnTo = (params.returnTo as string) || RETURN_HUB_PATH;
   const [isPro, setIsPro] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [selectedTier, setSelectedTier] = useState<IdentityTier | null>(null);
