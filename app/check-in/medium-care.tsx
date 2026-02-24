@@ -35,7 +35,7 @@ export default function MediumCareScreen() {
       careNote: note,
     };
     
-    router.push({
+    router.replace({
       pathname: '/check-in/confirm-enter',
       params: sessionData,
     });

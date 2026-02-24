@@ -63,7 +63,7 @@ export default function HeavyContainmentScreen() {
       remindToExit: remindMe.toString(),
     };
     
-    router.push({
+    router.replace({
       pathname: '/check-in/confirm-enter',
       params: sessionData,
     });

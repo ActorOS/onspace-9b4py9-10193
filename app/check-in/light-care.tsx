@@ -36,7 +36,7 @@ export default function LightCareScreen() {
       careNote: note,
     };
     
-    router.push({
+    router.replace({
       pathname: '/check-in/confirm-enter',
       params: sessionData,
     });
