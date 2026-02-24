@@ -184,8 +184,7 @@ export default function PreWorkCheckInScreen() {
               <Pressable
                 style={styles.secondaryButton}
                 onPress={() => {
-                  router.back();
-                  router.push('/role/entry');
+                  router.replace('/role/entry');
                 }}
               >
                 <Text style={styles.secondaryButtonText}>Open Role Container</Text>
