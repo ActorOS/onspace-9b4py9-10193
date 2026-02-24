@@ -87,7 +87,7 @@ export default function ConfirmEnterScreen() {
       });
 
       // Navigate to the in-work screen
-      router.replace({
+      router.push({
         pathname: '/check-in/in-work',
         params: { sessionId: session.id },
       });
