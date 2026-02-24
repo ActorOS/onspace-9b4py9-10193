@@ -216,18 +216,6 @@ export default function HomeScreen() {
           
           <Pressable 
             style={styles.actionButton}
-            onPress={() => router.push('/check-in/pre')}
-          >
-            <MaterialIcons name="play-circle-outline" size={24} color={colors.primary} />
-            <View style={styles.actionTextContainer}>
-              <Text style={styles.actionTitle}>Enter Work</Text>
-              <Text style={styles.actionSubtext}>Begin with intention.</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
-          </Pressable>
-
-          <Pressable 
-            style={styles.actionButton}
             onPress={() => router.push('/grounding')}
           >
             <MaterialIcons name="spa" size={24} color={colors.accent} />
