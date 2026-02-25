@@ -31,7 +31,7 @@ export default function GroundingScreen() {
       setShowUpgradePrompt(true);
       return;
     }
-    router.push(route as any);
+    router.push({ pathname: route, params: { returnTo: '/grounding' } } as any);
   };
 
   const handleReturned = async () => {
@@ -103,7 +103,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => handleExercisePress('/return/exercise-breathing', false)}
+              onPress={() => router.push({ pathname: '/return/exercise-breathing', params: { returnTo: '/grounding' } })}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="air" size={28} color={colors.primary} />
@@ -119,7 +119,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => handleExercisePress('/return/exercise-bodyscan', false)}
+              onPress={() => router.push({ pathname: '/return/exercise-bodyscan', params: { returnTo: '/grounding' } })}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="self-improvement" size={28} color={colors.accent} />
@@ -135,7 +135,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => router.push('/return/identity-separation-tiers')}
+              onPress={() => router.push({ pathname: '/return/identity-separation-tiers', params: { returnTo: '/grounding' } })}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="psychology" size={28} color={colors.primary} />
@@ -151,7 +151,7 @@ export default function GroundingScreen() {
 
             <Pressable 
               style={styles.exerciseCard}
-              onPress={() => handleExercisePress('/return/exercise-intimacy', false)}
+              onPress={() => router.push({ pathname: '/return/exercise-intimacy', params: { returnTo: '/grounding' } })}
             >
               <View style={styles.exerciseIcon}>
                 <MaterialIcons name="spa" size={28} color={colors.primary} />
@@ -173,7 +173,7 @@ export default function GroundingScreen() {
             <View style={styles.quickResetGrid}>
               <Pressable 
                 style={styles.quickResetButton}
-                onPress={() => router.push('/return/quick-name')}
+                onPress={() => router.push({ pathname: '/return/quick-name', params: { returnTo: '/grounding' } })}
               >
                 <MaterialIcons name="person" size={24} color={colors.primary} />
                 <Text style={styles.quickResetText}>I am [Your Name]</Text>
@@ -181,7 +181,7 @@ export default function GroundingScreen() {
 
               <Pressable 
                 style={styles.quickResetButton}
-                onPress={() => router.push('/return/quick-location')}
+                onPress={() => router.push({ pathname: '/return/quick-location', params: { returnTo: '/grounding' } })}
               >
                 <MaterialIcons name="place" size={24} color={colors.primary} />
                 <Text style={styles.quickResetText}>Where I Am</Text>
@@ -189,7 +189,7 @@ export default function GroundingScreen() {
 
               <Pressable 
                 style={styles.quickResetButton}
-                onPress={() => router.push('/return/quick-date')}
+                onPress={() => router.push({ pathname: '/return/quick-date', params: { returnTo: '/grounding' } })}
               >
                 <MaterialIcons name="today" size={24} color={colors.primary} />
                 <Text style={styles.quickResetText}>Today's Date</Text>
@@ -197,7 +197,7 @@ export default function GroundingScreen() {
 
               <Pressable 
                 style={styles.quickResetButton}
-                onPress={() => router.push('/return/quick-movement')}
+                onPress={() => router.push({ pathname: '/return/quick-movement', params: { returnTo: '/grounding' } })}
               >
                 <MaterialIcons name="directions-walk" size={24} color={colors.primary} />
                 <Text style={styles.quickResetText}>Move Body</Text>
