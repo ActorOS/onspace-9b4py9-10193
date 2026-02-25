@@ -10,6 +10,7 @@ import { colors, spacing, typography, borderRadius } from '@/constants/theme';
 import { returnSessionStorage } from '@/services/returnSessionStorage';
 import { systemVoiceAudio } from '@/constants/systemAudio';
 import { useReturnHubBack } from '@/hooks/useReturnHubBack';
+import { trackExerciseStarted, trackExerciseCompleted, trackExerciseAbandoned } from '@/services/usageTracking';
 
 // Detailed sequenced breathing exercise with voice-led guidance
 // 8-segment flow with repetition cycles for deep settling
