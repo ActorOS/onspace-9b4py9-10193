@@ -477,7 +477,10 @@ export default function RoleEntryScreen() {
                               endDate: isOngoing ? undefined : endDate?.toISOString(),
                               isOngoing: isOngoing || undefined,
                             });
-                            router.push('/check-in/pre');
+                            router.dismiss();
+                            setTimeout(() => {
+                              router.push('/check-in/pre');
+                            }, 100);
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -505,7 +508,9 @@ export default function RoleEntryScreen() {
                               isOngoing: isOngoing || undefined,
                             });
                             router.dismiss();
-                            router.push(`/role/${newRole.id}`);
+                            setTimeout(() => {
+                              router.push(`/role/${newRole.id}`);
+                            }, 100);
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -518,7 +523,29 @@ export default function RoleEntryScreen() {
 
                       <Pressable 
                         style={styles.nextStepButton}
-                        onPress={handleComplete}
+                        onPress={async () => {
+                          setIsSaving(true);
+                          try {
+                            await roleStorage.saveRole({
+                              characterName: characterName.trim(),
+                              production: production.trim(),
+                              productionType: productionType || undefined,
+                              whatRoleAsks: whatRoleAsks.trim() || undefined,
+                              boundaries: boundaries.trim() || undefined,
+                              status: 'open',
+                              startDate: startDate?.toISOString(),
+                              endDate: isOngoing ? undefined : endDate?.toISOString(),
+                              isOngoing: isOngoing || undefined,
+                            });
+                            router.dismiss();
+                            setTimeout(() => {
+                              router.push('/(tabs)');
+                            }, 100);
+                          } catch (error) {
+                            console.error('Failed to save role:', error);
+                            setIsSaving(false);
+                          }
+                        }}
                       >
                         <MaterialIcons name="home" size={24} color={colors.textSecondary} />
                         <Text style={styles.nextStepButtonText}>Return home</Text>
