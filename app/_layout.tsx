@@ -106,6 +106,10 @@ export default function RootLayout() {
           options={{ presentation: 'modal', gestureEnabled: false }}
         />
         <Stack.Screen 
+          name="return/exercise-stage-home" 
+          options={{ presentation: 'modal', gestureEnabled: false }}
+        />
+        <Stack.Screen 
           name="return/quick-name" 
           options={{ presentation: 'modal' }}
         />

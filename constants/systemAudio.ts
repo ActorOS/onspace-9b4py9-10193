@@ -154,6 +154,21 @@ export const systemVoiceAudio = {
     identityReclaim: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_09_identity+reclaim.mp3',
     close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20Somatic/intimacy/intimacy_10_close.mp3',
   },
+
+  /**
+   * Stage to Home Exercise
+   * Guided transition from performance/rehearsal to home - nervous system regulation during commute
+   */
+  exerciseStageHome: {
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome%20_%20arrival_01.mp3',
+    externalAwareness: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_02_externalawareness.mp3',
+    bodyDrop: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_03_bodydrop.mp3',
+    breathReset: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_04_breathreset.mp3',
+    discharge: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_05_discharge.mp3',
+    identityBoundary: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_06_identityboundary.mp3',
+    sensoryAnchor: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_07_sensoryanchor.mp3',
+    close: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_08_close.mp3',
+  },
 } as const;
 
 export type SystemAudioKey = keyof typeof systemVoiceAudio;
