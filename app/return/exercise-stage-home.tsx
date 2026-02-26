@@ -105,10 +105,10 @@ export default function StageToHomeExerciseScreen() {
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        console.error('[Audio] Timeout waiting for audio to finish');
+        console.error('[Audio] Timeout waiting for audio to finish - advancing to next step');
         sound.setOnPlaybackStatusUpdate(null);
-        reject(new Error('Audio playback timeout'));
-      }, 60000); // 60 second timeout
+        resolve(); // Resolve instead of reject to allow sequence to continue
+      }, 30000); // 30 second timeout (shorter for faster recovery)
 
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
@@ -121,7 +121,7 @@ export default function StageToHomeExerciseScreen() {
             console.error('[Audio] Playback error:', status.error);
             clearTimeout(timeout);
             sound.setOnPlaybackStatusUpdate(null);
-            reject(new Error(status.error));
+            resolve(); // Resolve instead of reject to allow sequence to continue
           }
         }
       });
