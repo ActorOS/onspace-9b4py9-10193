@@ -44,6 +44,7 @@ export default function GroundingScreen() {
         workSession = await sessionStorage.getActiveSession();
       }
       
+      // Only update work session if one exists (from post-work flow)
       if (workSession) {
         // Complete the work session
         await sessionStorage.updateSession(workSession.id, {
@@ -52,18 +53,7 @@ export default function GroundingScreen() {
         });
       }
 
-      // Log the return session
-      const roleId = workSession?.roleId || await returnSessionStorage.getActiveRoleId();
-      await returnSessionStorage.saveReturnSession({
-        createdAt: new Date().toISOString(),
-        roleId,
-        source: 'release_return',
-        completed: true,
-        completionType: 'exercise',
-        notes: 'Full return to self completed',
-      });
-
-      // Navigate to home where Recent Work will show the completed session
+      // Navigate to home
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to complete session:', error);

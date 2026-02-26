@@ -219,19 +219,6 @@ export default function BreathingExerciseScreen() {
         completionAt: new Date().toISOString(),
       });
       
-      // Only save return session if not in stack mode
-      if (!isStackMode) {
-        const roleId = await returnSessionStorage.getActiveRoleId();
-        await returnSessionStorage.saveReturnSession({
-          createdAt: new Date().toISOString(),
-          roleId,
-          source: 'release_return',
-          completed: true,
-          completionType: 'exercise',
-          notes: 'Breathing & Release exercise completed',
-        });
-      }
-      
       // If in stack mode, go back to play screen; otherwise return to Return Hub
       if (isStackMode) {
         router.back();
