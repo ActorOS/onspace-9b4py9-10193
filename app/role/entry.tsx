@@ -462,26 +462,32 @@ export default function RoleEntryScreen() {
                   ) : (
                     <>
                       <Pressable 
-                        style={styles.nextStepButton}
-                        onPress={async () => {
+                        style={({ pressed }) => [
+                          styles.nextStepButton,
+                          pressed && styles.nextStepButtonPressed
+                        ]}
+                        onPress={() => {
+                          console.log('[DEBUG] Enter role now pressed');
                           setIsSaving(true);
-                          try {
-                            await roleStorage.saveRole({
-                              characterName: characterName.trim(),
-                              production: production.trim(),
-                              productionType: productionType || undefined,
-                              whatRoleAsks: whatRoleAsks.trim() || undefined,
-                              boundaries: boundaries.trim() || undefined,
-                              status: 'open',
-                              startDate: startDate?.toISOString(),
-                              endDate: isOngoing ? undefined : endDate?.toISOString(),
-                              isOngoing: isOngoing || undefined,
-                            });
+                          roleStorage.saveRole({
+                            characterName: characterName.trim(),
+                            production: production.trim(),
+                            productionType: productionType || undefined,
+                            whatRoleAsks: whatRoleAsks.trim() || undefined,
+                            boundaries: boundaries.trim() || undefined,
+                            status: 'open',
+                            startDate: startDate?.toISOString(),
+                            endDate: isOngoing ? undefined : endDate?.toISOString(),
+                            isOngoing: isOngoing || undefined,
+                          })
+                          .then(() => {
+                            console.log('[DEBUG] Role saved, navigating to pre-work');
                             router.replace('/check-in/pre');
-                          } catch (error) {
-                            console.error('Failed to save role:', error);
+                          })
+                          .catch((error) => {
+                            console.error('[ERROR] Failed to save role:', error);
                             setIsSaving(false);
-                          }
+                          });
                         }}
                       >
                         <MaterialIcons name="play-circle-outline" size={24} color={colors.primary} />
@@ -489,26 +495,32 @@ export default function RoleEntryScreen() {
                       </Pressable>
 
                       <Pressable 
-                        style={styles.nextStepButton}
-                        onPress={async () => {
+                        style={({ pressed }) => [
+                          styles.nextStepButton,
+                          pressed && styles.nextStepButtonPressed
+                        ]}
+                        onPress={() => {
+                          console.log('[DEBUG] Add character notes pressed');
                           setIsSaving(true);
-                          try {
-                            const newRole = await roleStorage.saveRole({
-                              characterName: characterName.trim(),
-                              production: production.trim(),
-                              productionType: productionType || undefined,
-                              whatRoleAsks: whatRoleAsks.trim() || undefined,
-                              boundaries: boundaries.trim() || undefined,
-                              status: 'open',
-                              startDate: startDate?.toISOString(),
-                              endDate: isOngoing ? undefined : endDate?.toISOString(),
-                              isOngoing: isOngoing || undefined,
-                            });
+                          roleStorage.saveRole({
+                            characterName: characterName.trim(),
+                            production: production.trim(),
+                            productionType: productionType || undefined,
+                            whatRoleAsks: whatRoleAsks.trim() || undefined,
+                            boundaries: boundaries.trim() || undefined,
+                            status: 'open',
+                            startDate: startDate?.toISOString(),
+                            endDate: isOngoing ? undefined : endDate?.toISOString(),
+                            isOngoing: isOngoing || undefined,
+                          })
+                          .then((newRole) => {
+                            console.log('[DEBUG] Role saved, navigating to role details');
                             router.replace(`/role/${newRole.id}`);
-                          } catch (error) {
-                            console.error('Failed to save role:', error);
+                          })
+                          .catch((error) => {
+                            console.error('[ERROR] Failed to save role:', error);
                             setIsSaving(false);
-                          }
+                          });
                         }}
                       >
                         <MaterialIcons name="edit" size={24} color={colors.textSecondary} />
@@ -516,26 +528,32 @@ export default function RoleEntryScreen() {
                       </Pressable>
 
                       <Pressable 
-                        style={styles.nextStepButton}
-                        onPress={async () => {
+                        style={({ pressed }) => [
+                          styles.nextStepButton,
+                          pressed && styles.nextStepButtonPressed
+                        ]}
+                        onPress={() => {
+                          console.log('[DEBUG] Return home pressed');
                           setIsSaving(true);
-                          try {
-                            await roleStorage.saveRole({
-                              characterName: characterName.trim(),
-                              production: production.trim(),
-                              productionType: productionType || undefined,
-                              whatRoleAsks: whatRoleAsks.trim() || undefined,
-                              boundaries: boundaries.trim() || undefined,
-                              status: 'open',
-                              startDate: startDate?.toISOString(),
-                              endDate: isOngoing ? undefined : endDate?.toISOString(),
-                              isOngoing: isOngoing || undefined,
-                            });
+                          roleStorage.saveRole({
+                            characterName: characterName.trim(),
+                            production: production.trim(),
+                            productionType: productionType || undefined,
+                            whatRoleAsks: whatRoleAsks.trim() || undefined,
+                            boundaries: boundaries.trim() || undefined,
+                            status: 'open',
+                            startDate: startDate?.toISOString(),
+                            endDate: isOngoing ? undefined : endDate?.toISOString(),
+                            isOngoing: isOngoing || undefined,
+                          })
+                          .then(() => {
+                            console.log('[DEBUG] Role saved, navigating to home');
                             router.replace('/(tabs)');
-                          } catch (error) {
-                            console.error('Failed to save role:', error);
+                          })
+                          .catch((error) => {
+                            console.error('[ERROR] Failed to save role:', error);
                             setIsSaving(false);
-                          }
+                          });
                         }}
                       >
                         <MaterialIcons name="home" size={24} color={colors.textSecondary} />
@@ -907,6 +925,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     marginBottom: spacing.sm,
+  },
+  nextStepButtonPressed: {
+    backgroundColor: colors.surfaceElevated,
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   nextStepButtonText: {
     fontSize: typography.sizes.md,
