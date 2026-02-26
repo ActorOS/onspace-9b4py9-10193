@@ -78,31 +78,53 @@ export default function BodyScanExerciseScreen() {
         await soundRef.current.unloadAsync();
       }
 
+      console.log('[Audio] Setting audio mode...');
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
         shouldDuckAndroid: true,
       });
 
+      console.log('[Audio] Loading sound:', url.substring(0, 50) + '...');
       const { sound } = await Audio.Sound.createAsync(
         { uri: url },
-        { shouldPlay: true, volume: 0.85 }
+        { shouldPlay: false, volume: 0.85 }
       );
       
       soundRef.current = sound;
+      
+      console.log('[Audio] Starting playback...');
+      await sound.playAsync();
+      
+      console.log('[Audio] Playback started successfully');
       return sound;
     } catch (error) {
-      console.log('Audio step failed:', error);
+      console.error('[Audio] Failed to play audio:', error);
       throw error;
     }
   };
 
   const waitForAudioEnd = (sound: Audio.Sound): Promise<void> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.error('[Audio] Timeout waiting for audio to finish');
+        sound.setOnPlaybackStatusUpdate(null);
+        reject(new Error('Audio playback timeout'));
+      }, 60000); // 60 second timeout
+
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.setOnPlaybackStatusUpdate(null); // Clear listener
-          resolve();
+        if (status.isLoaded) {
+          if (status.didJustFinish) {
+            console.log('[Audio] Audio finished playing');
+            clearTimeout(timeout);
+            sound.setOnPlaybackStatusUpdate(null);
+            resolve();
+          } else if (status.error) {
+            console.error('[Audio] Playback error:', status.error);
+            clearTimeout(timeout);
+            sound.setOnPlaybackStatusUpdate(null);
+            reject(new Error(status.error));
+          }
         }
       });
     });
