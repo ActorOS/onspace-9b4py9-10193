@@ -34,6 +34,14 @@ const RETURN_TO_SELF_EXERCISES: ExerciseOption[] = [
     requiresPro: true,
   },
   {
+    id: 'stage-home',
+    title: 'Stage to Home',
+    purpose: 'Guided transition for commute from performance',
+    icon: 'directions-walk',
+    route: '/return/exercise-stage-home',
+    requiresPro: false,
+  },
+  {
     id: 'quick-name',
     title: 'Name Yourself',
     purpose: 'Ground in your own identity',

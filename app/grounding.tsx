@@ -154,6 +154,22 @@ export default function GroundingScreen() {
               </View>
               <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
             </Pressable>
+
+            <Pressable 
+              style={styles.exerciseCard}
+              onPress={() => router.push({ pathname: '/return/exercise-stage-home', params: { returnTo: '/grounding' } })}
+            >
+              <View style={styles.exerciseIcon}>
+                <MaterialIcons name="directions-walk" size={28} color={colors.accent} />
+              </View>
+              <View style={styles.exerciseContent}>
+                <Text style={styles.exerciseTitle}>Stage to Home</Text>
+                <Text style={styles.exerciseDescription}>
+                  Guided transition for commute from performance
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textTertiary} />
+            </Pressable>
           </View>
 
           {/* Quick Return */}
