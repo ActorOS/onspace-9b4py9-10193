@@ -478,9 +478,7 @@ export default function RoleEntryScreen() {
                               isOngoing: isOngoing || undefined,
                             });
                             router.dismiss();
-                            setTimeout(() => {
-                              router.push('/check-in/pre');
-                            }, 100);
+                            router.push('/check-in/pre');
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -508,9 +506,7 @@ export default function RoleEntryScreen() {
                               isOngoing: isOngoing || undefined,
                             });
                             router.dismiss();
-                            setTimeout(() => {
-                              router.push(`/role/${newRole.id}`);
-                            }, 100);
+                            router.push(`/role/${newRole.id}`);
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -538,9 +534,7 @@ export default function RoleEntryScreen() {
                               isOngoing: isOngoing || undefined,
                             });
                             router.dismiss();
-                            setTimeout(() => {
-                              router.push('/(tabs)');
-                            }, 100);
+                            router.push('/(tabs)');
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
