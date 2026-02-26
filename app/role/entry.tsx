@@ -477,8 +477,7 @@ export default function RoleEntryScreen() {
                               endDate: isOngoing ? undefined : endDate?.toISOString(),
                               isOngoing: isOngoing || undefined,
                             });
-                            router.dismiss();
-                            router.push('/check-in/pre');
+                            router.replace('/check-in/pre');
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -505,8 +504,7 @@ export default function RoleEntryScreen() {
                               endDate: isOngoing ? undefined : endDate?.toISOString(),
                               isOngoing: isOngoing || undefined,
                             });
-                            router.dismiss();
-                            router.push(`/role/${newRole.id}`);
+                            router.replace(`/role/${newRole.id}`);
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
@@ -533,8 +531,7 @@ export default function RoleEntryScreen() {
                               endDate: isOngoing ? undefined : endDate?.toISOString(),
                               isOngoing: isOngoing || undefined,
                             });
-                            router.dismiss();
-                            router.push('/(tabs)');
+                            router.replace('/(tabs)');
                           } catch (error) {
                             console.error('Failed to save role:', error);
                             setIsSaving(false);
