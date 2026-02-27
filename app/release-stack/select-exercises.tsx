@@ -90,11 +90,19 @@ const AVAILABLE_EXERCISES: ExerciseOption[] = [
     requiresPro: true,
   },
   {
-    id: 'grounding',
+    id: 'stage-home',
     name: 'Stage to Home',
+    description: 'Transition from performance to home',
+    route: '/return/exercise-stage-home',
+    icon: 'home',
+    requiresPro: false,
+  },
+  {
+    id: 'grounding',
+    name: 'Gentle Grounding',
     description: 'Sensory grounding exercise',
     route: '/return/exercise-grounding',
-    icon: 'home',
+    icon: 'spa',
     requiresPro: false,
   },
   {
