@@ -160,7 +160,7 @@ export const systemVoiceAudio = {
    * Guided transition from performance/rehearsal to home - nervous system regulation during commute
    */
   exerciseStageHome: {
-    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome%20_%20arrival_01.mp3',
+    arrival: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome _ arrival_01.mp3',
     externalAwareness: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_02_externalawareness.mp3',
     bodyDrop: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_03_bodydrop.mp3',
     breathReset: 'https://szaenpzeozualdgfbcqt.supabase.co/storage/v1/object/public/Audio%20-%20System/system/voice-main/Stage-to-home/stagetohome_04_breathreset.mp3',
